@@ -8,10 +8,12 @@
 --
 -------------------------------------------------------------------------
 
--- v021
---  - Fixed an issue where WotLK grouping would show in the quest list
---  - Fixed an issue where phased quests completed on early realms would show before becoming available on late realms
---  - Added more metadata for WotLK quests
+-- v023
+--  - Added Wrath Dungeon quests
+--  - Added settings to disregard TBC or Wrath quests
+--  - Added a setting to disregard seasonal quests
+--  - Fixed an issue where the tab counts where incorrect.
+--  - Fixed an issue with the profession filter
 
 
 -------------------------------------------------------------------------
@@ -202,18 +204,72 @@ local dllocal_options = {
 			width = "full",
 			order = 120,
 		},
+		spacer50 = {
+			type = "description",
+			name = " ",
+			width = "full",
+			order = 130,
+		},
+		showTBCDailies = {
+			type = "toggle",
+			name = "Show TBC Dailies",
+			desc = "Show dailies linked to The Burning Crusade content.",
+			get = function(info) return Dailies_Settings.showTBCDailies end,
+			set = function(info, val) 
+				Dailies_Settings.showTBCDailies = val 
+				-- need async otherwise the quest is not detected as completed
+				C_Timer.After(0.2, function()	
+					Dailies.ClassifyQuests() 
+					if dllocal_frame and dllocal_frame:IsVisible() then Dailies.ShowTabContent() end
+				end) 
+			end,
+			width = "full",
+			order = 140,
+		},
+		showWotLKDailies = {
+			type = "toggle",
+			name = "Show WotLK Dailies",
+			desc = "Show dailies linked to Wrath of the Lich King content.",
+			get = function(info) return Dailies_Settings.showWotLKDailies end,
+			set = function(info, val)
+				Dailies_Settings.showWotLKDailies = val 
+				-- need async otherwise the quest is not detected as completed
+				C_Timer.After(0.2, function()	
+					Dailies.ClassifyQuests() 
+					if dllocal_frame and dllocal_frame:IsVisible() then Dailies.ShowTabContent() end
+				end) 
+			end,
+			width = "full",
+			order = 150,
+		},
+		showSeasonalDailies = {
+			type = "toggle",
+			name = "Show Seasonal Dailies",
+			desc = "Show dailies linked to seasonal events (like Brewfest or Midsummer Fire Festival for example).",
+			get = function(info) return Dailies_Settings.showSeasonalDailies end,
+			set = function(info, val) 
+				Dailies_Settings.showSeasonalDailies = val 
+				-- need async otherwise the quest is not detected as completed
+				C_Timer.After(0.2, function()	
+					Dailies.ClassifyQuests() 
+					if dllocal_frame and dllocal_frame:IsVisible() then Dailies.ShowTabContent() end
+				end) 
+			end,
+			width = "full",
+			order = 160,
+		},
 		spacer4 = {
 			type = "description",
 			name = " \n \n \n ",
 			width = "full",
-			order = 130,
+			order = 170,
 		},
 		credits = {
 			type = "description",
 			name = " Join the discord server to bugs/suggestions/comments:\n |cffffd100https://discord.gg/MpfDeBZ|r\n\n Hope you like the addon,\n /Hug from Cixi/Gaya @ Remulos Horde",
 			width = "full",
 			fontSize = "medium",
-			order = 140,
+			order = 180,
 		},
 	}
 }
@@ -309,6 +365,10 @@ function Dailies:OnEnable()
 	
 	if Dailies_Settings.runScanOnLogin == nil then Dailies_Settings.runScanOnLogin = true end
 	if Dailies_Settings.scanForAnyDailies == nil then Dailies_Settings.scanForAnyDailies = false end
+
+	if Dailies_Settings.showSeasonalDailies == nil then Dailies_Settings.showSeasonalDailies = true end
+	if Dailies_Settings.showTBCDailies == nil then Dailies_Settings.showTBCDailies = true end
+	if Dailies_Settings.showWotLKDailies == nil then Dailies_Settings.showWotLKDailies = true end
 
 	
 	-- set defaults for existing dailies on new toons
@@ -1143,379 +1203,390 @@ function Dailies.ShowTabContent()
 
 				local q = Dailies_Data.Quests[kq]
 
-				local header = string.upper(dllocal_group[kq] and dllocal_group[kq].group or "")
-				if header == "" then header = string.upper(q.Zone or "") end
-				if header == "" then header = "OTHER (Missing Zone)" end
+				local expac = 2
+				if kq > 12000 then expac = 3 end
 
-				-- only mark as completed those that actually got completed in the group.
-				-- by default the API marks all quests of a group as completed together, so we need to check our data to know which one.
-				local completed = C_QuestLog.IsQuestFlaggedCompleted(kq)
-				--if completed and q.TodayUntil == nil then completed = false end  
-				
---				if completed and Dailies_Data.Toons[dllocal_charKey].Quests[kq].Completed == nil then completed = false end  
---				
---				if q.TodayUntil ~= nil then 
---					if t.Quests[kq].Completed > q.TodayUntil - fullday then 
-
-				-- add to listed groups to avoid the generic group line
-				if completed and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
-				if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
-
-				dllocal_orderlist[Dailies.count(dllocal_orderlist)+1] = kq
-
-				-- Check if we already have the quest in our log
-				local alreadyHaveIt = Dailies.AlreadyHaveQuest(kq)
-
-
-				-- Now check if that quest if part of a group where you can only have 1 of the group at the time
-				-- for example the fishing daily, or the cooking daily, or the daily dungeon
-
-				-- logic to follow:
-				--  - if you already have the quest, then show that.
-				--  - if it is the daily, then show it UNLESS we already have one of that group in our log.
-				--  - if the quest is not daily and not already in log, skip it
-				--  - if we've done one from the group, skip all and put a placeholder with the group name
-				--  - if we know the daily and it's not the one we have, then add an alternative line to say this quest can be picked up instead if needed
-
-				local todaysDaily = true
-				-- if a group, check if it's todays
-				--AD if dllocal_group[kq] then if dllocal_group[kq].today == nil then todaysDaily = false end	end
-				if q.TodayUntil == nil then 
-					todaysDaily = false
-				elseif (time(date("!*t")) + dllocal_tzdiff) > q.TodayUntil then
-					q.TodayUntil = nil
-					todaysDaily = false 
-				end
-
-				local haveAnotherAlready = false
-				if dllocal_group[kq] then  -- part of a group
-					for kq2, q2 in pairs(dllocal_group) do 
-						if dllocal_group[kq2].group == dllocal_group[kq].group and kq2 ~= kq then
-							if Dailies.AlreadyHaveQuest(kq2) then 
-								haveAnotherAlready = true 
-								--print("disregarding "..kq.. " since " .. kq2 .. " is already selected")
-							end
-						end
-					end
-				end
-
-
-				-- add to listed groups to avoid the generic group line
-				if dllocal_group[kq] and listedGroups[dllocal_group[kq].group] == nil then listedGroups[dllocal_group[kq].group] = true end
-				
-
-
-				if header ~= previousHeader and dllocal_tabkey == "all" then  
-					local head = AceGUI:Create("Label")
-					if previousHeader ~= "" then head:SetText("\n" .. header)
-					else head:SetText(header)  end -- display the header, add a blank row first if not the first header
-					head:SetFullWidth(true)
-					head:SetJustifyH("LEFT")
-					head:SetFont(GameFontNormal:GetFont(), 12)
+				if (Dailies_Settings.showTBCDailies and expac == 2) or (Dailies_Settings.showWotLKDailies and expac == 3) then 
 					
-					scroll:AddChild(head)
-				end 
+					if dllocal_seasonal[kq] == nil or (Dailies_Settings.showSeasonalDailies and dllocal_seasonal[kq] ~= nil) then 
+
+						local header = string.upper(dllocal_group[kq] and dllocal_group[kq].group or "")
+						if header == "" then header = string.upper(q.Zone or "") end
+						if header == "" then header = "OTHER (Missing Zone)" end
+
+						-- only mark as completed those that actually got completed in the group.
+						-- by default the API marks all quests of a group as completed together, so we need to check our data to know which one.
+						local completed = C_QuestLog.IsQuestFlaggedCompleted(kq)
+						--if completed and q.TodayUntil == nil then completed = false end  
+						
+		--				if completed and Dailies_Data.Toons[dllocal_charKey].Quests[kq].Completed == nil then completed = false end  
+		--				
+		--				if q.TodayUntil ~= nil then 
+		--					if t.Quests[kq].Completed > q.TodayUntil - fullday then 
+
+						-- add to listed groups to avoid the generic group line
+						if completed and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
+						if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
+
+						dllocal_orderlist[Dailies.count(dllocal_orderlist)+1] = kq
+
+						-- Check if we already have the quest in our log
+						local alreadyHaveIt = Dailies.AlreadyHaveQuest(kq)
 
 
-				--Compact view
-				local tit = "|cffffd100" .. q.Title .. "|r"
-				local status = "|TInterface\\AddOns\\Dailies\\Images\\available:16|t"
-				local desc = "This quest is available for you to pick up."
-				if alreadyHaveIt then 
-					if Dailies.ReadyToComplete(kq) then 
-						status = "|TInterface\\AddOns\\Dailies\\Images\\selecteddone:16|t"; 
-						desc = "This quest is ready to turn in."
-						tit = "|cff00ff00" .. q.Title .. "|r" -- green is quest is ready to turn in 
-					else
-						status = "|TInterface\\AddOns\\Dailies\\Images\\selected:16|t"; 
-						desc = "You have that quest in your quest log." 
-					end
-				end
-				if completed then status = "|TInterface\\AddOns\\Dailies\\Images\\completed:16|t"; desc = "You have completed this quest today" end 
-				if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored then status = "|TInterface\\AddOns\\Dailies\\Images\\ignored:16|t"; desc = "You are ignoring this quest" end 
+						-- Now check if that quest if part of a group where you can only have 1 of the group at the time
+						-- for example the fishing daily, or the cooking daily, or the daily dungeon
 
+						-- logic to follow:
+						--  - if you already have the quest, then show that.
+						--  - if it is the daily, then show it UNLESS we already have one of that group in our log.
+						--  - if the quest is not daily and not already in log, skip it
+						--  - if we've done one from the group, skip all and put a placeholder with the group name
+						--  - if we know the daily and it's not the one we have, then add an alternative line to say this quest can be picked up instead if needed
 
-				-- check if any other toon has already completed this quest and add them to the tool tip
-				local otherCompleted = ""
+						local todaysDaily = true
+						-- if a group, check if it's todays
+						--AD if dllocal_group[kq] then if dllocal_group[kq].today == nil then todaysDaily = false end	end
+						if q.TodayUntil == nil then 
+							todaysDaily = false
+						elseif (time(date("!*t")) + dllocal_tzdiff) > q.TodayUntil then
+							q.TodayUntil = nil
+							todaysDaily = false 
+						end
 
-				for kt, t in pairs(Dailies_Data.Toons) do --all toons
-					if t.Quests[kq] and t.Quests[kq].Completed ~= nil then 
-						if q.TodayUntil ~= nil then 
-							if t.Quests[kq].Completed > q.TodayUntil - fullday then 
-								otherCompleted = otherCompleted .. "\n" ..  " |TInterface\\AddOns\\Dailies\\Images\\completed:16|t " .. kt
+						local haveAnotherAlready = false
+						if dllocal_group[kq] then  -- part of a group
+							for kq2, q2 in pairs(dllocal_group) do 
+								if dllocal_group[kq2].group == dllocal_group[kq].group and kq2 ~= kq then
+									if Dailies.AlreadyHaveQuest(kq2) then 
+										haveAnotherAlready = true 
+										--print("disregarding "..kq.. " since " .. kq2 .. " is already selected")
+									end
+								end
 							end
 						end
-					end 
-				end
-
-				local quest = AceGUI:Create("SimpleGroup")
-				quest:SetFullWidth(true)
-				quest:SetAutoAdjustHeight(true)
-				quest:SetLayout("Flow")
-					local showprof = true
-					if dllocal_group[kq] then 
-						if dllocal_group[kq].short then 
-							tit = tit .. "|cff808080 - |r|cffffffff" .. dllocal_group[kq].short .. "|r"
-						end
-
-						if dllocal_tabkey ~= "all" then 
-							tit = tit .. "|cff808080 - " .. dllocal_group[kq].group .. "|r"
-						end
-						showprof = false
-					end
-
-					if dllocal_prof[kq] and showprof then 
-						if dllocal_ProfessionNames[GetLocale()] then 
-							if dllocal_ProfessionNames[GetLocale()][dllocal_prof[kq]] then 
-								tit = tit .. "|cff808080 - " .. dllocal_ProfessionNames[GetLocale()][dllocal_prof[kq]] .. "|r"
-							end
-						end
-					end
 
 
-					local title = AceGUI:Create("InteractiveLabel")
-					title:SetText(status.." "..tit)
-					if dllocal_tabkey ~= "all" then 
-						title:SetWidth(380)
-					else
-						title:SetWidth(380 +20 +20)  --to make up for the arrows being hidden
-					end
-					title:SetJustifyH("LEFT")
-					title:SetFont(GameFontNormal:GetFont(), 12)
-					title:SetCallback("OnEnter", function() 
-						GameTooltip:SetOwner(title.frame,"ANCHOR_NONE")
-						GameTooltip:SetPoint("TOPLEFT", title.frame,"BOTTOMLEFT", 20, -8)
-						local dd = desc
-						if Dailies_Settings.showQuestInfoPanel then dd = dd .. "\nClick for more info." end
-
-						if otherCompleted ~= "" then dd = dd .. "\n\n|cffffffffAlready completed by:\n"..otherCompleted.."|r" end
-						GameTooltip:SetText("|cffa0a0a0" .. dd .. "|r")
-					end)
-
-					title:SetCallback("OnClick", function() 
-						if Dailies_Settings.showQuestInfoPanel then 
-							if q.NPC and q.NPC ~= "" then 
-								dllocal_info_npc:SetText("Quest giver: |cffffd100" .. q.NPC .. "|r") 
-							else
-								dllocal_info_npc:SetText("Quest giver: |cffffd100-|r") 
-							end 
-							if q.Zone and q.Zone ~= "" then dllocal_info_zone:SetText(q.Zone) else dllocal_info_zone:SetText("- ") end 
-
-							local timesCompleted = 0
-							if Dailies_Data.Toons[dllocal_charKey].Quests[kq].TimesCompleted then 
-								timesCompleted = Dailies_Data.Toons[dllocal_charKey].Quests[kq].TimesCompleted
-							end
-							dllocal_info_count:SetText("Times completed: |cffffd100" .. timesCompleted.."|r")
-							if q.SubZone and q.SubZone ~= ""  then dllocal_info_coords:SetText(q.SubZone) else dllocal_info_coords:SetText("- ") end
-							if q.Text then 
-								--dllocal_info_desc:SetText("\n|cffa0a0a0" .. q.Text:gsub("\\\\", "\\") .. "|r"); 
-								dllocal_info_desc:SetText("\n|cffa0a0a0" .. q.Text .. "|r"); 
-								dllocal_info_desc:SetJustifyH("LEFT") 
-							end
-							if q.Title then dllocal_info_heading:SetText("|cffffffff" .. q.Title .. "|r") end
+						-- add to listed groups to avoid the generic group line
+						if dllocal_group[kq] and listedGroups[dllocal_group[kq].group] == nil then listedGroups[dllocal_group[kq].group] = true end
+						
 
 
-							if dllocal_group[kq] and dllocal_group[kq].long then 
-								dllocal_info_inst:SetText("Instance: |cffffd100" .. dllocal_group[kq].long .. "|r");
-								dllocal_info_inst.frame:Show()
-							else 
-								dllocal_info_inst:SetText("") 
-								dllocal_info_inst.frame:Hide()
-							end
+						if header ~= previousHeader and dllocal_tabkey == "all" then  
+							local head = AceGUI:Create("Label")
+							if previousHeader ~= "" then head:SetText("\n" .. header)
+							else head:SetText(header)  end -- display the header, add a blank row first if not the first header
+							head:SetFullWidth(true)
+							head:SetJustifyH("LEFT")
+							head:SetFont(GameFontNormal:GetFont(), 12)
 							
-							dllocal_info_attune:SetText("") 
-							dllocal_info_attune.frame:Hide()
-							if dllocal_attuneId[kq] and Attune_Data then 
+							scroll:AddChild(head)
+						end 
 
-								local attId = nil
-								if type(dllocal_attuneId[kq]) == "table" then attId = dllocal_attuneId[kq][dllocal_faction] else attId = dllocal_attuneId[kq] end
 
-								for i, a in pairs(Attune_Data.attunes) do
-									if tonumber(a.ID) == attId then
-										dllocal_info_attune:SetText("Click to open Attune on: |cffffd100" .. a.NAME .. "|r")
-										dllocal_info_attune.frame:Show()
+						--Compact view
+						local tit = "|cffffd100" .. q.Title .. "|r"
+						local status = "|TInterface\\AddOns\\Dailies\\Images\\available:16|t"
+						local desc = "This quest is available for you to pick up."
+						if alreadyHaveIt then 
+							if Dailies.ReadyToComplete(kq) then 
+								status = "|TInterface\\AddOns\\Dailies\\Images\\selecteddone:16|t"; 
+								desc = "This quest is ready to turn in."
+								tit = "|cff00ff00" .. q.Title .. "|r" -- green is quest is ready to turn in 
+							else
+								status = "|TInterface\\AddOns\\Dailies\\Images\\selected:16|t"; 
+								desc = "You have that quest in your quest log." 
+							end
+						end
+						if completed then status = "|TInterface\\AddOns\\Dailies\\Images\\completed:16|t"; desc = "You have completed this quest today" end 
+						if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored then status = "|TInterface\\AddOns\\Dailies\\Images\\ignored:16|t"; desc = "You are ignoring this quest" end 
 
-										dllocal_info_attune:SetCallback("OnClick", function() 
-											if Attune_Data then 
-												Attune_SlashCommandHandler("")
-												Attune_Select("" .. attId)
-											end
-										end)					
+
+						-- check if any other toon has already completed this quest and add them to the tool tip
+						local otherCompleted = ""
+
+						for kt, t in pairs(Dailies_Data.Toons) do --all toons
+							if t.Quests[kq] and t.Quests[kq].Completed ~= nil then 
+								if q.TodayUntil ~= nil then 
+									if t.Quests[kq].Completed > q.TodayUntil - fullday then 
+										otherCompleted = otherCompleted .. "\n" ..  " |TInterface\\AddOns\\Dailies\\Images\\completed:16|t " .. kt
+									end
+								end
+							end 
+						end
+
+						local quest = AceGUI:Create("SimpleGroup")
+						quest:SetFullWidth(true)
+						quest:SetAutoAdjustHeight(true)
+						quest:SetLayout("Flow")
+							local showprof = true
+							if dllocal_group[kq] then 
+								if dllocal_group[kq].short then 
+									tit = tit .. "|cff808080 - |r|cffffffff" .. dllocal_group[kq].short .. "|r"
+								end
+
+								if dllocal_tabkey ~= "all" then 
+									tit = tit .. "|cff808080 - " .. dllocal_group[kq].group .. "|r"
+								end
+								showprof = false
+							end
+
+							if dllocal_prof[kq] and showprof then 
+								if dllocal_ProfessionNames[GetLocale()] then 
+									if dllocal_ProfessionNames[GetLocale()][dllocal_prof[kq]] then 
+										tit = tit .. "|cff808080 - " .. dllocal_ProfessionNames[GetLocale()][dllocal_prof[kq]] .. "|r"
 									end
 								end
 							end
 
-						end
-
-					end)
-					title:SetCallback("OnLeave", function() GameTooltip:Hide() end)
-					quest:AddChild(title)
-
-
-
-					local repText = ""
-					local tooltip = ""
-					if q.Honor > 0 then 
-						repText = q.Honor .. " |TInterface\\AddOns\\Dailies\\Images\\pvp-arenapoints-icon:16|t"  
-						tooltip = "|TInterface\\AddOns\\Dailies\\Images\\pvp-arenapoints-icon:16|t |cffa0a0a0+" .. q.Honor .. " Honor Points|r"
-					end
-					totalHonor = totalHonor + q.Honor
-					if dllocal_reps[kq] then 
-						for kr, r in Dailies.spairs(dllocal_reps[kq], function(t,a,b) 	return a < b end) do --sorted reps
-							if dllocal_repfaction[kr] == nil or dllocal_repfaction[kr] == dllocal_faction then 
-								repText = "  |T" .. dllocal_repicons[kr] .. ":16|t" .. repText
-								local name, _, _, _, _, earnedValue = GetFactionInfoByID(kr)
-								tooltip = "|T" .. dllocal_repicons[kr] .. ":16|t |cffa0a0a0+" .. r .. " " .. (name or "Unknown Reputation") .. " rep|r\n" .. tooltip
-								if totalReps[kr] == nil then totalReps[kr] = r else totalReps[kr] = totalReps[kr] + r end
+							if dllocal_seasonal[kq] then 
+								tit = tit .. "|cff808080 - Seasonal|r"
 							end
-						end
-					end
-					local rep = AceGUI:Create("InteractiveLabel")
-					rep:SetText(repText)
-					rep:SetWidth(50)
-					rep:SetJustifyH("RIGHT")
-					rep:SetFont(GameFontNormal:GetFont(), 12)
-					if tooltip ~= "" then 
-						rep:SetCallback("OnEnter", function() 
-							GameTooltip:SetOwner(rep.frame,"ANCHOR_NONE")
-							GameTooltip:SetPoint("TOPLEFT", rep.frame,"TOPRIGHT", 10, 3)
-							GameTooltip:SetText(tooltip)
-						end)				
-						rep:SetCallback("OnLeave", function() GameTooltip:Hide() end)
-					end
-					quest:AddChild(rep)
 
+							local title = AceGUI:Create("InteractiveLabel")
+							title:SetText(status.." "..tit)
+							if dllocal_tabkey ~= "all" then 
+								title:SetWidth(380)
+							else
+								title:SetWidth(380 +20 +20)  --to make up for the arrows being hidden
+							end
+							title:SetJustifyH("LEFT")
+							title:SetFont(GameFontNormal:GetFont(), 12)
+							title:SetCallback("OnEnter", function() 
+								GameTooltip:SetOwner(title.frame,"ANCHOR_NONE")
+								GameTooltip:SetPoint("TOPLEFT", title.frame,"BOTTOMLEFT", 20, -8)
+								local dd = desc
+								if Dailies_Settings.showQuestInfoPanel then dd = dd .. "\nClick for more info." end
 
-
-					local rewardText = ""
-					if q.Money > 0 then rewardText = GetMoneyString(q.Money, true) end
-					totalGold = totalGold + q.Money
-					local reward = AceGUI:Create("InteractiveLabel")
-					reward:SetText(rewardText)
-					reward:SetWidth(80)
-					reward:SetJustifyH("RIGHT")
-					reward:SetFont(GameFontNormal:GetFont(), 12)
-					quest:AddChild(reward)
-
-					-- don't show arrows on All tab (quests are sorted by group)
-					if dllocal_tabkey ~= "all" then 
-						local moveup = AceGUI:Create("InteractiveLabel")
-						moveup:SetWidth(20)
-						moveup:SetJustifyH("CENTER")
-						moveup:SetCallback("OnEnter", function() 
-							GameTooltip:SetOwner(moveup.frame,"ANCHOR_NONE")
-							GameTooltip:SetPoint("TOPLEFT", moveup.frame,"BOTTOMLEFT", 10, 0)
-							GameTooltip:SetText("Move this daily up")
-						end)				
-						moveup:SetCallback("OnLeave", function() GameTooltip:Hide() end)
-						if count == 1 then 
-							moveup:SetDisabled(true)
-							moveup:SetText("|TInterface\\AddOns\\Dailies\\Images\\moveup:16|t")
-						else
-							moveup:SetText("|TInterface\\AddOns\\Dailies\\Images\\moveup:16|t")
-							moveup:SetCallback("OnClick", function() 
-								local prev = 0
-								for ko, o in pairs(dllocal_orderlist) do 
-									if o == kq then prev = dllocal_orderlist[ko-1] end
-								end
-									
-								if prev ~= nil and prev ~= 0 then  -- checking if top of list
-									local ord = Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order
-									Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order = Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order
-									Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order = ord
-									Dailies.ShowTabContent()
-								end
+								if otherCompleted ~= "" then dd = dd .. "\n\n|cffffffffAlready completed by:\n"..otherCompleted.."|r" end
+								GameTooltip:SetText("|cffa0a0a0" .. dd .. "|r")
 							end)
-						end
-						quest:AddChild(moveup)
 
-								
-						local movedn = AceGUI:Create("InteractiveLabel")
-						movedn:SetWidth(20)
-						movedn:SetJustifyH("CENTER")
-						movedn:SetCallback("OnEnter", function() 
-							GameTooltip:SetOwner(movedn.frame,"ANCHOR_NONE")
-							GameTooltip:SetPoint("TOPLEFT", movedn.frame,"BOTTOMLEFT", 10, 0)
-							GameTooltip:SetText("Move this daily down")
-						end)
-						movedn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
-						movedn:SetText("|TInterface\\AddOns\\Dailies\\Images\\movedn:16|t")
-						movedn:SetCallback("OnClick", function() 
-							local prev = 0
-							--print(Dailies.count(dllocal_orderlist))
-							for ko, o in pairs(dllocal_orderlist) do 
-								if o == kq then prev = dllocal_orderlist[ko+1] end
+							title:SetCallback("OnClick", function() 
+								if Dailies_Settings.showQuestInfoPanel then 
+									if q.NPC and q.NPC ~= "" then 
+										dllocal_info_npc:SetText("Quest giver: |cffffd100" .. q.NPC .. "|r") 
+									else
+										dllocal_info_npc:SetText("Quest giver: |cffffd100-|r") 
+									end 
+									if q.Zone and q.Zone ~= "" then dllocal_info_zone:SetText(q.Zone) else dllocal_info_zone:SetText("- ") end 
+
+									local timesCompleted = 0
+									if Dailies_Data.Toons[dllocal_charKey].Quests[kq].TimesCompleted then 
+										timesCompleted = Dailies_Data.Toons[dllocal_charKey].Quests[kq].TimesCompleted
+									end
+									dllocal_info_count:SetText("Times completed: |cffffd100" .. timesCompleted.."|r")
+									if q.SubZone and q.SubZone ~= ""  then dllocal_info_coords:SetText(q.SubZone) else dllocal_info_coords:SetText("- ") end
+									if q.Text then 
+										--dllocal_info_desc:SetText("\n|cffa0a0a0" .. q.Text:gsub("\\\\", "\\") .. "|r"); 
+										dllocal_info_desc:SetText("\n|cffa0a0a0" .. q.Text .. "|r"); 
+										dllocal_info_desc:SetJustifyH("LEFT") 
+									end
+									if q.Title then dllocal_info_heading:SetText("|cffffffff" .. q.Title .. "|r") end
+
+
+									if dllocal_group[kq] and dllocal_group[kq].long then 
+										dllocal_info_inst:SetText("Instance: |cffffd100" .. dllocal_group[kq].long .. "|r");
+										dllocal_info_inst.frame:Show()
+									else 
+										dllocal_info_inst:SetText("") 
+										dllocal_info_inst.frame:Hide()
+									end
+									
+									dllocal_info_attune:SetText("") 
+									dllocal_info_attune.frame:Hide()
+									if dllocal_attuneId[kq] and Attune_Data then 
+
+										local attId = nil
+										if type(dllocal_attuneId[kq]) == "table" then attId = dllocal_attuneId[kq][dllocal_faction] else attId = dllocal_attuneId[kq] end
+
+										for i, a in pairs(Attune_Data.attunes) do
+											if tonumber(a.ID) == attId then
+												dllocal_info_attune:SetText("Click to open Attune on: |cffffd100" .. a.NAME .. "|r")
+												dllocal_info_attune.frame:Show()
+
+												dllocal_info_attune:SetCallback("OnClick", function() 
+													if Attune_Data then 
+														Attune_SlashCommandHandler("")
+														Attune_Select("" .. attId)
+													end
+												end)					
+											end
+										end
+									end
+
+								end
+
+							end)
+							title:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+							quest:AddChild(title)
+
+
+
+							local repText = ""
+							local tooltip = ""
+							if q.Honor > 0 then 
+								repText = q.Honor .. " |TInterface\\AddOns\\Dailies\\Images\\pvp-arenapoints-icon:16|t"  
+								tooltip = "|TInterface\\AddOns\\Dailies\\Images\\pvp-arenapoints-icon:16|t |cffa0a0a0+" .. q.Honor .. " Honor Points|r"
 							end
-							
-							if prev ~= nil and prev ~= 0 then  -- checking if bottom of list
-								local ord = Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order
-								Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order = Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order
-								Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order = ord
-								Dailies.ShowTabContent()
+							totalHonor = totalHonor + q.Honor
+							if dllocal_reps[kq] then 
+								for kr, r in Dailies.spairs(dllocal_reps[kq], function(t,a,b) 	return a < b end) do --sorted reps
+									if dllocal_repfaction[kr] == nil or dllocal_repfaction[kr] == dllocal_faction then 
+										repText = "  |T" .. dllocal_repicons[kr] .. ":16|t" .. repText
+										local name, _, _, _, _, earnedValue = GetFactionInfoByID(kr)
+										tooltip = "|T" .. dllocal_repicons[kr] .. ":16|t |cffa0a0a0+" .. r .. " " .. (name or "Unknown Reputation") .. " rep|r\n" .. tooltip
+										if totalReps[kr] == nil then totalReps[kr] = r else totalReps[kr] = totalReps[kr] + r end
+									end
+								end
 							end
-						end)
-						quest:AddChild(movedn)
-					end
-
-					local ignore = AceGUI:Create("InteractiveLabel")
-					ignore:SetJustifyH("CENTER")
-					--if dllocal_tabkey ~= "ignored" then 
-					if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored == false then 
-						ignore:SetText("|TInterface\\AddOns\\Dailies\\Images\\ignored:16|t")
-						ignore:SetWidth(20)
-						ignore:SetCallback("OnClick", function() 
-							Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored = true
-							Dailies.ShowTabContent()
-						end)
-						ignore:SetCallback("OnEnter", function() 
-							GameTooltip:SetOwner(ignore.frame,"ANCHOR_NONE")
-							GameTooltip:SetPoint("TOPLEFT", ignore.frame,"BOTTOMLEFT", 10, 0)
-							GameTooltip:SetText("Move this daily to the Ignore list")
-						end)
-					else 
-						ignore:SetText("|TInterface\\AddOns\\Dailies\\Images\\completed:16|t")
-						ignore:SetWidth(20)
-						ignore:SetCallback("OnClick", function() 
-							Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored = false
-							Dailies.ShowTabContent()
-						end)
-						ignore:SetCallback("OnEnter", function() 
-							GameTooltip:SetOwner(ignore.frame,"ANCHOR_NONE")
-							GameTooltip:SetPoint("TOPLEFT", ignore.frame,"BOTTOMLEFT", 10, 0)
-							GameTooltip:SetText("Remove this daily from the Ignore list")
-						end)
-					end		
-					ignore:SetCallback("OnLeave", function() GameTooltip:Hide() end)	
-					quest:AddChild(ignore)
-
-
-					--give alternative to group quest if any available (today's daily of the same group)
-					local actualDaily = nil
-					if dllocal_group[kq] then -- part of a group
-						for kq2, q2 in pairs(dllocal_group) do 
-							if dllocal_group[kq2].group == dllocal_group[kq].group and kq2 ~= kq then -- others from same group
-								if Dailies_Data.Quests[kq2] and Dailies_Data.Quests[kq2].TodayUntil and Dailies_Data.Quests[kq2].TodayUntil > (time(date("!*t")) + dllocal_tzdiff) then actualDaily = kq2 end
-								--if dllocal_group[kq2].today then actualDaily = kq2 end
+							local rep = AceGUI:Create("InteractiveLabel")
+							rep:SetText(repText)
+							rep:SetWidth(50)
+							rep:SetJustifyH("RIGHT")
+							rep:SetFont(GameFontNormal:GetFont(), 12)
+							if tooltip ~= "" then 
+								rep:SetCallback("OnEnter", function() 
+									GameTooltip:SetOwner(rep.frame,"ANCHOR_NONE")
+									GameTooltip:SetPoint("TOPLEFT", rep.frame,"TOPRIGHT", 10, 3)
+									GameTooltip:SetText(tooltip)
+								end)				
+								rep:SetCallback("OnLeave", function() GameTooltip:Hide() end)
 							end
-						end
+							quest:AddChild(rep)
+
+
+
+							local rewardText = ""
+							if q.Money > 0 then rewardText = GetMoneyString(q.Money, true) end
+							totalGold = totalGold + q.Money
+							local reward = AceGUI:Create("InteractiveLabel")
+							reward:SetText(rewardText)
+							reward:SetWidth(80)
+							reward:SetJustifyH("RIGHT")
+							reward:SetFont(GameFontNormal:GetFont(), 12)
+							quest:AddChild(reward)
+
+							-- don't show arrows on All tab (quests are sorted by group)
+							if dllocal_tabkey ~= "all" then 
+								local moveup = AceGUI:Create("InteractiveLabel")
+								moveup:SetWidth(20)
+								moveup:SetJustifyH("CENTER")
+								moveup:SetCallback("OnEnter", function() 
+									GameTooltip:SetOwner(moveup.frame,"ANCHOR_NONE")
+									GameTooltip:SetPoint("TOPLEFT", moveup.frame,"BOTTOMLEFT", 10, 0)
+									GameTooltip:SetText("Move this daily up")
+								end)				
+								moveup:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+								if count == 1 then 
+									moveup:SetDisabled(true)
+									moveup:SetText("|TInterface\\AddOns\\Dailies\\Images\\moveup:16|t")
+								else
+									moveup:SetText("|TInterface\\AddOns\\Dailies\\Images\\moveup:16|t")
+									moveup:SetCallback("OnClick", function() 
+										local prev = 0
+										for ko, o in pairs(dllocal_orderlist) do 
+											if o == kq then prev = dllocal_orderlist[ko-1] end
+										end
+											
+										if prev ~= nil and prev ~= 0 then  -- checking if top of list
+											local ord = Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order
+											Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order = Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order
+											Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order = ord
+											Dailies.ShowTabContent()
+										end
+									end)
+								end
+								quest:AddChild(moveup)
+
+										
+								local movedn = AceGUI:Create("InteractiveLabel")
+								movedn:SetWidth(20)
+								movedn:SetJustifyH("CENTER")
+								movedn:SetCallback("OnEnter", function() 
+									GameTooltip:SetOwner(movedn.frame,"ANCHOR_NONE")
+									GameTooltip:SetPoint("TOPLEFT", movedn.frame,"BOTTOMLEFT", 10, 0)
+									GameTooltip:SetText("Move this daily down")
+								end)
+								movedn:SetCallback("OnLeave", function() GameTooltip:Hide() end)
+								movedn:SetText("|TInterface\\AddOns\\Dailies\\Images\\movedn:16|t")
+								movedn:SetCallback("OnClick", function() 
+									local prev = 0
+									--print(Dailies.count(dllocal_orderlist))
+									for ko, o in pairs(dllocal_orderlist) do 
+										if o == kq then prev = dllocal_orderlist[ko+1] end
+									end
+									
+									if prev ~= nil and prev ~= 0 then  -- checking if bottom of list
+										local ord = Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order
+										Dailies_Data.Toons[dllocal_charKey].Quests[prev].Order = Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order
+										Dailies_Data.Toons[dllocal_charKey].Quests[kq].Order = ord
+										Dailies.ShowTabContent()
+									end
+								end)
+								quest:AddChild(movedn)
+							end
+
+							local ignore = AceGUI:Create("InteractiveLabel")
+							ignore:SetJustifyH("CENTER")
+							--if dllocal_tabkey ~= "ignored" then 
+							if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored == false then 
+								ignore:SetText("|TInterface\\AddOns\\Dailies\\Images\\ignored:16|t")
+								ignore:SetWidth(20)
+								ignore:SetCallback("OnClick", function() 
+									Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored = true
+									Dailies.ShowTabContent()
+								end)
+								ignore:SetCallback("OnEnter", function() 
+									GameTooltip:SetOwner(ignore.frame,"ANCHOR_NONE")
+									GameTooltip:SetPoint("TOPLEFT", ignore.frame,"BOTTOMLEFT", 10, 0)
+									GameTooltip:SetText("Move this daily to the Ignore list")
+								end)
+							else 
+								ignore:SetText("|TInterface\\AddOns\\Dailies\\Images\\completed:16|t")
+								ignore:SetWidth(20)
+								ignore:SetCallback("OnClick", function() 
+									Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored = false
+									Dailies.ShowTabContent()
+								end)
+								ignore:SetCallback("OnEnter", function() 
+									GameTooltip:SetOwner(ignore.frame,"ANCHOR_NONE")
+									GameTooltip:SetPoint("TOPLEFT", ignore.frame,"BOTTOMLEFT", 10, 0)
+									GameTooltip:SetText("Remove this daily from the Ignore list")
+								end)
+							end		
+							ignore:SetCallback("OnLeave", function() GameTooltip:Hide() end)	
+							quest:AddChild(ignore)
+
+
+							--give alternative to group quest if any available (today's daily of the same group)
+							local actualDaily = nil
+							if dllocal_group[kq] then -- part of a group
+								for kq2, q2 in pairs(dllocal_group) do 
+									if dllocal_group[kq2].group == dllocal_group[kq].group and kq2 ~= kq then -- others from same group
+										if Dailies_Data.Quests[kq2] and Dailies_Data.Quests[kq2].TodayUntil and Dailies_Data.Quests[kq2].TodayUntil > (time(date("!*t")) + dllocal_tzdiff) then actualDaily = kq2 end
+										--if dllocal_group[kq2].today then actualDaily = kq2 end
+									end
+								end
+							end
+
+							if actualDaily and dllocal_tabkey == "todo" then 
+								local daily = AceGUI:Create("Label")
+								daily:SetText("     |TInterface\\AddOns\\Dailies\\Images\\alternative:16|t|cff808080If you prefer, today's daily is actually |r|cffffd100" .. Dailies_Data.Quests[actualDaily].Title .. "|r")
+								daily:SetFullWidth(true)
+								daily:SetJustifyH("LEFT")
+								daily:SetFont(GameFontNormal:GetFont(), 12)
+								quest:AddChild(daily)
+							end
+
+						scroll:AddChild(quest)
+
+						-- ensuring groups are only listed once
+						if completed and dllocal_group[kq] then completedGroups[dllocal_group[kq].group] = true end
+
+						previousHeader = header
 					end
-
-					if actualDaily and dllocal_tabkey == "todo" then 
-						local daily = AceGUI:Create("Label")
-						daily:SetText("     |TInterface\\AddOns\\Dailies\\Images\\alternative:16|t|cff808080If you prefer, today's daily is actually |r|cffffd100" .. Dailies_Data.Quests[actualDaily].Title .. "|r")
-						daily:SetFullWidth(true)
-						daily:SetJustifyH("LEFT")
-						daily:SetFont(GameFontNormal:GetFont(), 12)
-						quest:AddChild(daily)
-					end
-
-				scroll:AddChild(quest)
-
-				-- ensuring groups are only listed once
-				if completed and dllocal_group[kq] then completedGroups[dllocal_group[kq].group] = true end
-
-				previousHeader = header
-
+				end
 			end
 
 
@@ -1549,64 +1620,68 @@ function Dailies.ShowTabContent()
 				for km, m in pairs(dllocal_group) do 
 					local skipgeneric = false
 					--check group is for the right expac
-					if m.expac == nil or m.expac <= dllocal_expac then 
-					
-						if m.faction == nil or m.faction == dllocal_faction then 
-
-							if Dailies_Settings.showOnlyForKnownProfessions and dllocal_prof[km] and Dailies_Data.Toons[dllocal_charKey].Professions[dllocal_prof[km]] == nil then skipgeneric = true end
-							
-							if skipgeneric == false then 
-								local found = false
-								for kl, l in pairs(listedGroups) do 
-									if m.group == kl then found = true end
-								end
-								
-								if found == false then
-									--print("found")
-									extras = extras + 1
-									listedGroups[m.group] = true		
-
-									if dllocal_tabkey == "todo" then 
-
-										--print(m.group)
-										local quest = AceGUI:Create("SimpleGroup")
-										quest:SetFullWidth(true)
-										quest:SetAutoAdjustHeight(true)
-										quest:SetLayout("Flow")
-
-											local title = AceGUI:Create("InteractiveLabel")
-											title:SetText("|TInterface\\AddOns\\Dailies\\Images\\available:16|t |cff808080Unknown " .. m.group .. " Daily|r")
-											title:SetWidth(360)
-											title:SetJustifyH("LEFT")
-											title:SetFont(GameFontNormal:GetFont(), 12)
-											--title:SetCallback("OnEnter", function()  		end)
-
-											title:SetCallback("OnClick", function() 
+					--if m.expac == nil or m.expac <= dllocal_expac then 
+					if m.expac == nil or (Dailies_Settings.showTBCDailies and m.expac <= 2) or (Dailies_Settings.showWotLKDailies and m.expac == 3) then 
 						
-												if Dailies_Settings.showQuestInfoPanel then 
+						if dllocal_seasonal[kq] == nil or (Dailies_Settings.showSeasonalDailies and dllocal_seasonal[kq] ~= nil) then 
+					
+							if m.faction == nil or m.faction == dllocal_faction then 
 
-													local groupCount = 0
-													for km2, m2 in pairs(dllocal_group) do 
-														if m.group == m2.group then groupCount = groupCount +1 end
-													end
+								if Dailies_Settings.showOnlyForKnownProfessions and dllocal_prof[km] and Dailies_Data.Toons[dllocal_charKey].Professions[dllocal_prof[km]] == nil then skipgeneric = true end
+								
+								if skipgeneric == false then 
+									local found = false
+									for kl, l in pairs(listedGroups) do 
+										if m.group == kl then found = true end
+									end
+									
+									if found == false then
+										--print("found")
+										extras = extras + 1
+										listedGroups[m.group] = true		
+
+										if dllocal_tabkey == "todo" then 
+
+											--print(m.group)
+											local quest = AceGUI:Create("SimpleGroup")
+											quest:SetFullWidth(true)
+											quest:SetAutoAdjustHeight(true)
+											quest:SetLayout("Flow")
+
+												local title = AceGUI:Create("InteractiveLabel")
+												title:SetText("|TInterface\\AddOns\\Dailies\\Images\\available:16|t |cff808080Unknown " .. m.group .. " Daily|r")
+												title:SetWidth(360)
+												title:SetJustifyH("LEFT")
+												title:SetFont(GameFontNormal:GetFont(), 12)
+												--title:SetCallback("OnEnter", function()  		end)
+
+												title:SetCallback("OnClick", function() 
 							
-													dllocal_info_heading:SetText("") 
-													dllocal_info_npc:SetText(" ") 
-													dllocal_info_zone:SetText(" ")
-													dllocal_info_count:SetText(" ")
-													dllocal_info_coords:SetText(" ")
-													dllocal_info_attune:SetText(" ")
-													dllocal_info_attune.frame:Hide()
-													dllocal_info_inst:SetText(" ")
-													dllocal_info_inst.frame:Hide()
-													dllocal_info_desc:SetText("This daily quest is taken randomly from a pool of |cffffd100" .. groupCount .. " quests|r.|nWe don't yet know which one is the selected one for today."); 
-													
-												end
+													if Dailies_Settings.showQuestInfoPanel then 
 
-											end)							
-											quest:AddChild(title)
+														local groupCount = 0
+														for km2, m2 in pairs(dllocal_group) do 
+															if m.group == m2.group then groupCount = groupCount +1 end
+														end
+								
+														dllocal_info_heading:SetText("") 
+														dllocal_info_npc:SetText(" ") 
+														dllocal_info_zone:SetText(" ")
+														dllocal_info_count:SetText(" ")
+														dllocal_info_coords:SetText(" ")
+														dllocal_info_attune:SetText(" ")
+														dllocal_info_attune.frame:Hide()
+														dllocal_info_inst:SetText(" ")
+														dllocal_info_inst.frame:Hide()
+														dllocal_info_desc:SetText("This daily quest is taken randomly from a pool of |cffffd100" .. groupCount .. " quests|r.|nWe don't yet know which one is the selected one for today."); 
+														
+													end
 
-										scroll:AddChild(quest)
+												end)							
+												quest:AddChild(title)
+
+											scroll:AddChild(quest)
+										end
 									end
 								end
 							end
@@ -1614,8 +1689,7 @@ function Dailies.ShowTabContent()
 					end
 				end
 			end
-
-			dllocal_tabgroup:SetTabs({{value="todo", text="To Do ("..(Dailies.count(dllocal_questTabs.ToDo) + extras)..")"}, {value="completed", text="Completed ("..Dailies.count(dllocal_questTabs.Completed)..")"}, {value="ignored", text="Ignored ("..Dailies.count(dllocal_questTabs.Ignored)..")"}, {value="all", text="All Dailies ("..(Dailies.count(dllocal_questTabs.All)+extras)..")"}, {value="stats", text="Statistics"}})
+			dllocal_tabgroup:SetTabs({{value="todo", text="To Do ("..(Dailies.count(dllocal_questTabs.ToDo) + extras)..")"}, {value="completed", text="Completed ("..Dailies.count(dllocal_questTabs.Completed)..")"}, {value="ignored", text="Ignored ("..Dailies.count(dllocal_questTabs.Ignored)..")"}, {value="all", text="All Dailies ("..(Dailies.count(dllocal_questTabs.All))..")"}, {value="stats", text="Statistics"}})
 
 
 			-- if absolutely nothing was found, put a default message
@@ -1792,124 +1866,130 @@ function Dailies.ClassifyQuests()
 	
 	for kq, q in Dailies.spairs(Dailies_Data.Quests, function(t,a,b) 	return Dailies_Data.Toons[dllocal_charKey].Quests[a].Order < Dailies_Data.Toons[dllocal_charKey].Quests[b].Order end) do --all dailies
 
-		-- only show quests available to this faction
-		if Dailies_Data.Quests[kq].Factions and Dailies_Data.Quests[kq].Factions[dllocal_faction] == 1 then 
+		local expac = 2
+		if kq > 12000 then expac = 3 end
 
-			if Dailies_Data.Quests[kq].Seen and  Dailies_Data.Quests[kq].Seen[GetRealmName()] == 1 then 
+		if (Dailies_Settings.showTBCDailies and expac == 2) or (Dailies_Settings.showWotLKDailies and expac == 3) then 
 
-				if dllocal_group[kq] == nil or dllocal_group[kq].faction == nil or dllocal_group[kq].faction == dllocal_faction then 
+			if dllocal_seasonal[kq] == nil or (Dailies_Settings.showSeasonalDailies and dllocal_seasonal[kq] ~= nil) then 
 
-					local skip = false
+				-- only show quests available to this faction
+				if Dailies_Data.Quests[kq].Factions and Dailies_Data.Quests[kq].Factions[dllocal_faction] == 1 then 
 
-					local completed = C_QuestLog.IsQuestFlaggedCompleted(kq)
-				--	if completed and Dailies_Data.Quests[kq].TodayUntil == nil then completed = false end  
+					if Dailies_Data.Quests[kq].Seen and  Dailies_Data.Quests[kq].Seen[GetRealmName()] == 1 then 
 
+						if dllocal_group[kq] == nil or dllocal_group[kq].faction == nil or dllocal_group[kq].faction == dllocal_faction then 
 
+							local skip = false
 
-
-
-					-- Check if we already have the quest in our log
-					local alreadyHaveIt = Dailies.AlreadyHaveQuest(kq)
-
-					local todaysDaily = true
-					local haveAnotherAlready = false
-
-					-- check if that quest if part of a group where you can only have 1 of the group at the time
-					-- for example the fishing daily, or the cooking daily, or the daily dungeon
-					if dllocal_group[kq] then  -- part of a group
-
-						-- if a group, check if it's todays
-						if q.TodayUntil == nil then 
-							todaysDaily = false
-						elseif (time(date("!*t")) + dllocal_tzdiff) > q.TodayUntil then
-							q.TodayUntil = nil
-							todaysDaily = false 
-						end
-
-						for kq2, q2 in pairs(dllocal_group) do 
-							if dllocal_group[kq2].group == dllocal_group[kq].group and kq2 ~= kq then
-								if Dailies.AlreadyHaveQuest(kq2) then haveAnotherAlready = true end
-							end
-						end
-
-					end
+							local completed = C_QuestLog.IsQuestFlaggedCompleted(kq)
+						--	if completed and Dailies_Data.Quests[kq].TodayUntil == nil then completed = false end  
 
 
-					-- This is to make sure the completed quest has actually been completed, and is not just showing because it's part of a completed group
-					if completed == true and todaysDaily == false then completed = false end
+							-- Check if we already have the quest in our log
+							local alreadyHaveIt = Dailies.AlreadyHaveQuest(kq)
 
-					-- add to listed groups to avoid the generic group line
-					if completed and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
-					if completed and dllocal_exclu[kq] then listedGroups[dllocal_exclu[kq].group] = true; end
-					
-					if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
-					if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored and dllocal_exclu[kq] then listedGroups[dllocal_exclu[kq].group] = true; end
-				
+							local todaysDaily = true
+							local haveAnotherAlready = false
 
-					if alreadyHaveIt == false and todaysDaily == false then skip = true end
-					if haveAnotherAlready == true and todaysDaily == true then skip = true end
+							-- check if that quest if part of a group where you can only have 1 of the group at the time
+							-- for example the fishing daily, or the cooking daily, or the daily dungeon
+							if dllocal_group[kq] then  -- part of a group
 
-					if completed then skip = false 	end
-
-					-- check if that quest is a temporaty quest, to be replaced by another at some point
-					-- if the new one exists, then never show the old one
-					-- for example the SSO phase quests
-					if dllocal_temp[kq] then  -- part of a temp
-						if Dailies_Data.Quests[dllocal_temp[kq]] then 
-							if Dailies_Data.Quests[dllocal_temp[kq]].Seen and Dailies_Data.Quests[dllocal_temp[kq]].Seen[GetRealmName()] then 
-								skip = true 
-							end
-						end
-					end		
-
-					if dllocal_group[kq] and completedGroups[dllocal_group[kq].group] then skip = true end
-					if dllocal_exclu[kq] and completedGroups[dllocal_exclu[kq].group] then skip = true end
-
-
-					-- professions
-					if Dailies_Settings.showOnlyForKnownProfessions and dllocal_prof[kq] and Dailies_Data.Toons[dllocal_charKey].Professions[dllocal_prof[kq]] == nil then skip = true end
-
-					-- add to listed groups to avoid the generic group line
-					if dllocal_group[kq] and listedGroups[dllocal_group[kq].group] == nil then listedGroups[dllocal_group[kq].group] = true end
-					
-					-- check quests against filter
-					if Dailies_Data.Toons[dllocal_charKey].RepFilter ~= nil then 
-						if dllocal_reps[kq] then 
-							for kr, r in Dailies.spairs(dllocal_reps[kq], function(t,a,b) 	return a < b end) do --sorted reps
-								if kq == 10110 then print(kr) end
-								if kr ~= Dailies_Data.Toons[dllocal_charKey].RepFilter then skip = true end
-							end
-						else 
-							skip = true -- no rep attached, skip if filter is active
-						end
-					end
-				
-					-- put in buckets
-					--if skip == false then dllocal_questTabs.All[kq] = 1 end
-					dllocal_questTabs.All[kq] = 1
-					if skip == false and completed == true then dllocal_questTabs.Completed[kq] = 1
-					elseif skip == false and Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored then dllocal_questTabs.Ignored[kq] = 1
-					elseif skip == false then dllocal_questTabs.ToDo[kq] = 1 
-						if first then 
-							first = false
-							dllocal_brokerlabel = Dailies_Data.Quests[kq].Title
-							if alreadyHaveIt then 
-								if Dailies.ReadyToComplete(kq) then 
-									dllocal_brokervalue = "|cff00ff00Turn In|r"
-								else
-									dllocal_brokervalue = ""
+								-- if a group, check if it's todays
+								if q.TodayUntil == nil then 
+									todaysDaily = false
+								elseif (time(date("!*t")) + dllocal_tzdiff) > q.TodayUntil then
+									q.TodayUntil = nil
+									todaysDaily = false 
 								end
-							else
-								dllocal_brokervalue = "|cff4040ffPick Up|r"
+
+								for kq2, q2 in pairs(dllocal_group) do 
+									if dllocal_group[kq2].group == dllocal_group[kq].group and kq2 ~= kq then
+										if Dailies.AlreadyHaveQuest(kq2) then haveAnotherAlready = true end
+									end
+								end
+
 							end
-							if Dailies_Broker then Dailies_Broker.text = dllocal_brokervalue .. " " .. dllocal_brokerlabel	end
+
+
+							-- This is to make sure the completed quest has actually been completed, and is not just showing because it's part of a completed group
+							if completed == true and todaysDaily == false then completed = false end
+
+							-- add to listed groups to avoid the generic group line
+							if completed and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
+							if completed and dllocal_exclu[kq] then listedGroups[dllocal_exclu[kq].group] = true; end
+							
+							if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored and dllocal_group[kq] then listedGroups[dllocal_group[kq].group] = true; end
+							if Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored and dllocal_exclu[kq] then listedGroups[dllocal_exclu[kq].group] = true; end
+						
+
+							if alreadyHaveIt == false and todaysDaily == false then skip = true end
+							if haveAnotherAlready == true and todaysDaily == true then skip = true end
+
+							if completed then skip = false 	end
+
+							-- check if that quest is a temporaty quest, to be replaced by another at some point
+							-- if the new one exists, then never show the old one
+							-- for example the SSO phase quests
+							if dllocal_temp[kq] then  -- part of a temp
+								if Dailies_Data.Quests[dllocal_temp[kq]] then 
+									if Dailies_Data.Quests[dllocal_temp[kq]].Seen and Dailies_Data.Quests[dllocal_temp[kq]].Seen[GetRealmName()] then 
+										skip = true 
+									end
+								end
+							end		
+
+							if dllocal_group[kq] and completedGroups[dllocal_group[kq].group] then skip = true end
+							if dllocal_exclu[kq] and completedGroups[dllocal_exclu[kq].group] then skip = true end
+
+
+							-- professions
+							if Dailies_Settings.showOnlyForKnownProfessions and dllocal_prof[kq] and Dailies_Data.Toons[dllocal_charKey].Professions[dllocal_prof[kq]] == nil then skip = true end
+
+							-- add to listed groups to avoid the generic group line
+							if dllocal_group[kq] and listedGroups[dllocal_group[kq].group] == nil then listedGroups[dllocal_group[kq].group] = true end
+							
+							-- check quests against filter
+							if Dailies_Data.Toons[dllocal_charKey].RepFilter ~= nil then 
+								if dllocal_reps[kq] then 
+									for kr, r in Dailies.spairs(dllocal_reps[kq], function(t,a,b) 	return a < b end) do --sorted reps
+										if kq == 10110 then print(kr) end
+										if kr ~= Dailies_Data.Toons[dllocal_charKey].RepFilter then skip = true end
+									end
+								else 
+									skip = true -- no rep attached, skip if filter is active
+								end
+							end
+						
+							-- put in buckets
+							--if skip == false then dllocal_questTabs.All[kq] = 1 end
+							dllocal_questTabs.All[kq] = 1
+							if skip == false and completed == true then dllocal_questTabs.Completed[kq] = 1
+							elseif skip == false and Dailies_Data.Toons[dllocal_charKey].Quests[kq].Ignored then dllocal_questTabs.Ignored[kq] = 1
+							elseif skip == false then dllocal_questTabs.ToDo[kq] = 1 
+								if first then 
+									first = false
+									dllocal_brokerlabel = Dailies_Data.Quests[kq].Title
+									if alreadyHaveIt then 
+										if Dailies.ReadyToComplete(kq) then 
+											dllocal_brokervalue = "|cff00ff00Turn In|r"
+										else
+											dllocal_brokervalue = ""
+										end
+									else
+										dllocal_brokervalue = "|cff4040ffPick Up|r"
+									end
+									if Dailies_Broker then Dailies_Broker.text = dllocal_brokervalue .. " " .. dllocal_brokerlabel	end
+								end
+							end
+									
+							-- ensuring groups are only listed once
+							if completed and dllocal_group[kq] then completedGroups[dllocal_group[kq].group] = true end
+							if completed and dllocal_exclu[kq] then completedGroups[dllocal_exclu[kq].group] = true end
+
 						end
 					end
-							
-					-- ensuring groups are only listed once
-					if completed and dllocal_group[kq] then completedGroups[dllocal_group[kq].group] = true end
-					if completed and dllocal_exclu[kq] then completedGroups[dllocal_exclu[kq].group] = true end
-
 				end
 			end
 		end

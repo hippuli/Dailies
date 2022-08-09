@@ -5,43 +5,43 @@ dllocal_group = {
 	[11667] = { group = "TBC Fishing";      expac=2},		[11668] = { group = "TBC Fishing";      expac=2},
 	[11669] = { group = "TBC Fishing";      expac=2},
 
-	[11377] = { group = "TBC Cooking"; },		[11379] = { group = "TBC Cooking"; },
-	[11381] = { group = "TBC Cooking"; },		[11380] = { group = "TBC Cooking"; },
+	[11377] = { group = "TBC Cooking";      expac=2},		[11379] = { group = "TBC Cooking";      expac=2},
+	[11381] = { group = "TBC Cooking";      expac=2},		[11380] = { group = "TBC Cooking",      expac=2},
 
-	[11354] = { group = "TBC Heroic";   short = "Ramps", 	long = "Hellfire Ramparts" },		
-    [11362] = { group = "TBC Heroic";   short = "BF", 		long = "The Blood Furnace" },
-	[11363] = { group = "TBC Heroic";   short = "ShH", 		long = "The Shattered Halls" },
-    [11368] = { group = "TBC Heroic";   short = "SP", 		long = "The Slave Pens" },
-	[11369] = { group = "TBC Heroic";   short = "UB", 		long = "The Underbog" },
-    [11370] = { group = "TBC Heroic";   short = "SV", 		long = "The Steamvault" },
-	[11372] = { group = "TBC Heroic";   short = "SH", 		long = "Sethekk Halls" },
-    [11373] = { group = "TBC Heroic";   short = "MT", 		long = "Mana-Tombs" },
-	[11374] = { group = "TBC Heroic";   short = "AC", 		long = "Auchenai Crypts" },
-    [11375] = { group = "TBC Heroic";   short = "SLab", 	long = "Shadow Labyrinth" },
-	[11378] = { group = "TBC Heroic";   short = "OHF", 		long = "Old Hillsbrad Foothills" },
-    [11382] = { group = "TBC Heroic";   short = "BM", 		long = "The Black Morass" },
-	[11384] = { group = "TBC Heroic";   short = "Bot", 		long = "The Botanica" },
-    [11386] = { group = "TBC Heroic";   short = "Mech", 	long = "The Mechanar" },
-	[11388] = { group = "TBC Heroic";   short = "Arc", 		long = "The Arcatraz" },
-    [11499] = { group = "TBC Heroic";   short = "MgT", 	    long = "Magisters' Terrace" },
+	[11354] = { group = "TBC Heroic",      expac=2;   short = "Ramps", 	long = "Hellfire Ramparts" },		
+    [11362] = { group = "TBC Heroic",      expac=2;   short = "BF", 	long = "The Blood Furnace" },
+	[11363] = { group = "TBC Heroic",      expac=2;   short = "ShH", 	long = "The Shattered Halls" },
+    [11368] = { group = "TBC Heroic",      expac=2;   short = "SP", 	long = "The Slave Pens" },
+	[11369] = { group = "TBC Heroic",      expac=2;   short = "UB", 	long = "The Underbog" },
+    [11370] = { group = "TBC Heroic",      expac=2;   short = "SV", 	long = "The Steamvault" },
+	[11372] = { group = "TBC Heroic",      expac=2;   short = "SH", 	long = "Sethekk Halls" },
+    [11373] = { group = "TBC Heroic",      expac=2;   short = "MT", 	long = "Mana-Tombs" },
+	[11374] = { group = "TBC Heroic",      expac=2;   short = "AC", 	long = "Auchenai Crypts" },
+    [11375] = { group = "TBC Heroic",      expac=2;   short = "SLab", 	long = "Shadow Labyrinth" },
+	[11378] = { group = "TBC Heroic",      expac=2;   short = "OHF", 	long = "Old Hillsbrad Foothills" },
+    [11382] = { group = "TBC Heroic",      expac=2;   short = "BM", 	long = "The Black Morass" },
+	[11384] = { group = "TBC Heroic",      expac=2;   short = "Bot", 	long = "The Botanica" },
+    [11386] = { group = "TBC Heroic",      expac=2;   short = "Mech", 	long = "The Mechanar" },
+	[11388] = { group = "TBC Heroic",      expac=2;   short = "Arc", 	long = "The Arcatraz" },
+    [11499] = { group = "TBC Heroic",      expac=2;   short = "MgT", 	long = "Magisters' Terrace" },
 	
-    [11364] = { group = "TBC Dungeon";  short = "ShH", 		long = "The Shattered Halls" },	
-    [11371] = { group = "TBC Dungeon";  short = "SV", 		long = "The Steamvault" },
-	[11376] = { group = "TBC Dungeon";  short = "SLab", 	long = "Shadow Labyrinth" },	
-    [11383] = { group = "TBC Dungeon";  short = "BM", 		long = "The Black Morass" },
-	[11385] = { group = "TBC Dungeon";  short = "Bot", 		long = "The Botanica" },	
-    [11387] = { group = "TBC Dungeon";  short = "Mech", 	long = "The Mechanar" },
-	[11389] = { group = "TBC Dungeon";  short = "Arc", 		long = "The Arcatraz" },	
-    [11500] = { group = "TBC Dungeon";  short = "MgT", 		long = "Magisters' Terrace" },
+    [11364] = { group = "TBC Dungeon",      expac=2;  short = "ShH", 	long = "The Shattered Halls" },	
+    [11371] = { group = "TBC Dungeon",      expac=2;  short = "SV", 	long = "The Steamvault" },
+	[11376] = { group = "TBC Dungeon",      expac=2;  short = "SLab", 	long = "Shadow Labyrinth" },	
+    [11383] = { group = "TBC Dungeon",      expac=2;  short = "BM", 	long = "The Black Morass" },
+	[11385] = { group = "TBC Dungeon",      expac=2;  short = "Bot", 	long = "The Botanica" },	
+    [11387] = { group = "TBC Dungeon",      expac=2;  short = "Mech", 	long = "The Mechanar" },
+	[11389] = { group = "TBC Dungeon",      expac=2;  short = "Arc", 	long = "The Arcatraz" },	
+    [11500] = { group = "TBC Dungeon",      expac=2;  short = "MgT", 	long = "Magisters' Terrace" },
 
-	[11335] = { group = "Alliance PvP";     faction="Alliance"},
-    [11336] = { group = "Alliance PvP";     faction="Alliance"},
-	[11337] = { group = "Alliance PvP";     faction="Alliance"},			
-    [11338] = { group = "Alliance PvP";     faction="Alliance"},
-	[11339] = { group = "Horde PvP";        faction="Horde"},
-    [11340] = { group = "Horde PvP";        faction="Horde"},
-	[11341] = { group = "Horde PvP";        faction="Horde"},
-    [11342] = { group = "Horde PvP";        faction="Horde"},
+	[11335] = { expac=2;  group = "Alliance PvP";     faction="Alliance"},
+    [11336] = { expac=2;  group = "Alliance PvP";     faction="Alliance"},
+	[11337] = { expac=2;  group = "Alliance PvP";     faction="Alliance"},			
+    [11338] = { expac=2;  group = "Alliance PvP";     faction="Alliance"},
+	[11339] = { expac=2;  group = "Horde PvP";        faction="Horde"},
+    [11340] = { expac=2;  group = "Horde PvP";        faction="Horde"},
+	[11341] = { expac=2;  group = "Horde PvP";        faction="Horde"},
+    [11342] = { expac=2;  group = "Horde PvP";        faction="Horde"},
 
      -- WotLK
      [13830] = { group = "Wrath Fishing",     expac=3},		[13832] = { group = "Wrath Fishing",     expac=3},
@@ -80,6 +80,11 @@ dllocal_group = {
     [13256] = { group = "Wrath Heroic";   expac=3,    short = "VH", 	long = "The Violet Hold" },	
     [13245] = { group = "Wrath Heroic";   expac=3,    short = "UK", 	long = "Utgarde Keep" },	
     [13248] = { group = "Wrath Heroic";   expac=3,    short = "UP", 	long = "Utgarde Pinnacle" },	
+
+    [13244] = { group = "Wrath Dungeon";   expac=3,    short = "HoL", 	long = "Halls of Lightning" },	
+    [13243] = { group = "Wrath Dungeon";   expac=3,    short = "CoS", 	long = "The Culling of Stratholme" },	
+    [13240] = { group = "Wrath Dungeon";   expac=3,    short = "Oc", 	long = "The Oculus" },	
+    [13241] = { group = "Wrath Dungeon";   expac=3,    short = "UP", 	long = "Utgarde Pinnacle" },
 
 }
 
@@ -262,25 +267,148 @@ dllocal_attuneId = {
 }
 
 
+-- List of quests that are seasonal only (used to filter them out if needed)
+dllocal_seasonal = {
+	[11691] = true,     --Midsummer Fire Festival
+    [11921] = true,     --Midsummer Fire Festival
+    [11924] = true,     --Midsummer Fire Festival
+    [11925] = true,     --Midsummer Fire Festival
+    [11926] = true,     --Midsummer Fire Festival
+    [11947] = true,     --Midsummer Fire Festival
+    [11948] = true,     --Midsummer Fire Festival
+    [11952] = true,     --Midsummer Fire Festival
+    [11953] = true,     --Midsummer Fire Festival
+    [11954] = true,     --Midsummer Fire Festival
+    [11917] = true,     --Midsummer Fire Festival
+
+    [12020] = true,     --Brewfest
+    [29393] = true,     --Brewfest
+    [12192] = true,     --Brewfest
+    [29394] = true,     --Brewfest
+    [11293] = true,     --Brewfest
+    [11294] = true,     --Brewfest
+    [11408] = true,     --Brewfest
+    [11407] = true,     --Brewfest
+ 
+    [29371] = true,     --Hallow's End
+    [29376] = true,     --Hallow's End
+    [29054] = true,     --Hallow's End
+    [29374] = true,     --Hallow's End
+    [29377] = true,     --Hallow's End
+    [29144] = true,     --Hallow's End
+    [29075] = true,     --Hallow's End
+    [39721] = true,     --Hallow's End
+    [43162] = true,     --Hallow's End
+    [39716] = true,     --Hallow's End
+    [12133] = true,     --Hallow's End
+    [29375] = true,     --Hallow's End
+    [11219] = true,     --Hallow's End
+    [11404] = true,     --Hallow's End
+    [11405] = true,     --Hallow's End
+    [12155] = true,     --Hallow's End
+    [11131] = true,     --Hallow's End
+    [11401] = true,     --Hallow's End
+    [12135] = true,     --Hallow's End
+    [39719] = true,     --Hallow's End
+    [39720] = true,     --Hallow's End
+    [12139] = true,     --Hallow's End
+
+    [44559] = true,     --Love is in the Air
+    [24645] = true,     --Love is in the Air
+    [44546] = true,     --Love is in the Air
+    [24638] = true,     --Love is in the Air
+    [24648] = true,     --Love is in the Air
+    [24649] = true,     --Love is in the Air
+    [24663] = true,     --Love is in the Air
+    [24666] = true,     --Love is in the Air
+    [24614] = true,     --Love is in the Air
+    [24647] = true,     --Love is in the Air
+    [24652] = true,     --Love is in the Air
+    [28934] = true,     --Love is in the Air
+    [35+22] = true,     --Love is in the Air
+    [24612] = true,     --Love is in the Air
+    [24650] = true,     --Love is in the Air
+    [24658] = true,     --Love is in the Air
+    [24664] = true,     --Love is in the Air
+    [24597] = true,     --Love is in the Air
+    [24613] = true,     --Love is in the Air
+    [24659] = true,     --Love is in the Air
+    [24662] = true,     --Love is in the Air
+    [24636] = true,     --Love is in the Air
+    [24660] = true,     --Love is in the Air
+    [44558] = true,     --Love is in the Air
+    [14488] = true,     --Love is in the Air
+    [24609] = true,     --Love is in the Air
+    [24610] = true,     --Love is in the Air
+    [24615] = true,     --Love is in the Air
+    [24629] = true,     --Love is in the Air
+    [24635] = true,     --Love is in the Air
+    [24651] = true,     --Love is in the Air
+    [24665] = true,     --Love is in the Air
+    [28935] = true,     --Love is in the Air
+    [44560] = true,     --Love is in the Air
+
+    [14058] = true,     --Pilgrim's Bounty
+    [14055] = true,     --Pilgrim's Bounty
+    [14051] = true,     --Pilgrim's Bounty
+    [14061] = true,     --Pilgrim's Bounty
+    [14060] = true,     --Pilgrim's Bounty
+    [14048] = true,     --Pilgrim's Bounty
+    [14053] = true,     --Pilgrim's Bounty
+    [14054] = true,     --Pilgrim's Bounty
+    [14059] = true,     --Pilgrim's Bounty
+    [14062] = true,     --Pilgrim's Bounty
+
+}
+
+
+
 dllocal_prof = {
 	[11016] = 393,		-- need skinning
 	[11017] = 182,		-- need herb
 	[11018] = 186,		-- need mining
 	
-	[11665] = 356,		-- need fishing
+	[11665] = 356,		-- need fishing / TBC
 	[11666] = 356,
 	[11667] = 356,		
 	[11668] = 356,
 	[11669] = 356,
 
-	[11377] = 185,		-- need cooking
+	[13830] = 356,		-- need fishing / Wrath
+	[13832] = 356,
+	[13833] = 356,		
+	[13834] = 356,
+	[13836] = 356,
+
+	[11377] = 185,		-- need cooking / TBC
 	[11379] = 185,
 	[11381] = 185,
 	[11380] = 185,
 
+    [13100] = 185,      -- need cooking / Wrath Alliance
+    [13101] = 185,
+    [13102] = 185,
+    [13103] = 185,
+    [13107] = 185,
+
+    [13112] = 185,      -- need cooking / Wrath Horde
+    [13113] = 185,
+    [13114] = 185,
+    [13115] = 185,
+    [13116] = 185,
+
+    [12958] = 755,
+    [12959] = 755,
+    [12960] = 755,
+    [12961] = 755,
+    [12962] = 755,
+    [12963] = 755,
+    
     ["Fishing"] = 356,
+    ["TBC Fishing"] = 356,
     ["Wrath Fishing"] = 356,
     ["Cooking"] = 185,
+    ["TBC Cooking"] = 185,
     ["Wrath Cooking"] = 185,
 }
 

@@ -8,12 +8,8 @@
 --
 -------------------------------------------------------------------------
 
--- v023
---  - Added Wrath Dungeon quests
---  - Added settings to disregard TBC or Wrath quests
---  - Added a setting to disregard seasonal quests
---  - Fixed an issue where the tab counts where incorrect.
---  - Fixed an issue with the profession filter
+-- v025
+--  - toc update
 
 
 -------------------------------------------------------------------------
@@ -431,7 +427,7 @@ function Dailies:OnEnable()
 				Dailies_Data.Quests[id].Text = "Placeholder. This will be populated next time you take the quest."
 				Dailies_Data.Quests[id].Frequency = "Daily"
 				Dailies_Data.Quests[id].Money = GetQuestLogRewardMoney(id) or 0
-				Dailies_Data.Quests[id].Xp = GetQuestLogRewardXP(id) or 0
+				Dailies_Data.Quests[id].Xp = 0 --GetQuestLogRewardXP(id) or 0 --not used, GetQuestLogRewardXP is deprecated
 				Dailies_Data.Quests[id].Honor = GetQuestLogRewardHonor(id) or 0
 				Dailies_Data.Quests[id].SubZone = ""			-- will be populated later
 				Dailies_Data.Quests[id].Zone = ""				-- will be populated later

@@ -4,7 +4,7 @@
 ## Notes: Plan your Dailies
 ## SavedVariables: Dailies_Data, Dailies_Settings
 ## SavedVariablesPerCharacter: 
-## Version: 025
+## Version: 029
 ## X-Website: https://warcraftratings.com
 embeds.xml
 Dailies.lua

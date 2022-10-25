@@ -8,8 +8,9 @@
 --
 -------------------------------------------------------------------------
 
--- v025
---  - toc update
+-- Done in v029
+--  - Removed the "All Things in Good Time" daily in Old Kingdom from the shared Heroic Dailies list
+--  - Hopefully fixed an issue where someone logging in and out quickly would cause spam in the guild saying "No player named '<name>' is currently playing."
 
 
 -------------------------------------------------------------------------
@@ -29,7 +30,7 @@ local dllocal_charKey = UnitName("player") .. "-" .. GetRealmName()					-- Chara
 local dllocal_prefix = "Dailies_Channel"											-- used for addon chat communications
 local dllocal_prefix_version = "Dailies_Version"									-- used for addon version check
 
-local dllocal_expac = 2
+local dllocal_expac = 3		-- default expac
 
 local dllocal_ldb = LibStub("LibDataBroker-1.1")
 local dllocal_Broker = nil
@@ -39,6 +40,7 @@ local dllocal_brokerlabel = nil
 
 local dllocal_filter_frame = nil		-- filter sub menu
 
+local dllocal_abort_sending = false		-- used to flag when abort is needed
 
 -- Frame variables
 local dllocal_initial = true			-- initial show of the frames
@@ -49,7 +51,7 @@ local dllocal_tabkey = "todo"			-- currently viewed tab
 local dllocal_inGuild = false			-- belong to a guild (for sending addon messages)
 local dllocal_faction = ""				-- to mark quest as one or the other or both
 
-local dllocal_fullWidth = 670			-- width of the frame
+local dllocal_fullWidth = 680			-- width of the frame
 local dllocal_fullHeight = 600			-- height of the frame
 
 local dllocal_questTabs = {}			-- all quests in their respective tabs
@@ -269,6 +271,29 @@ local dllocal_options = {
 		},
 	}
 }
+
+
+-- Thanks to Roadblock on Discord for this cool little snippet suggestion (and many other coding bits!)
+-- I know you'll read this, thanks ;-)
+local capture = _G.ERR_CHAT_PLAYER_NOT_FOUND_S:gsub("%%s","(.+)")
+local function noPlayerFilter(self,event,msg,sender,...)
+	local noPlayer = msg:match(capture)
+  	if noPlayer then
+	    -- abort any SendAddonMessage pending for that name
+	    dllocal_abort_sending = true
+	    return dllocal_abort_sending
+  	else -- other system message just let it pass through
+	    return false, msg, sender, ...
+  	end
+end
+
+function Dailies:AddFilter()
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", noPlayerFilter)
+end
+
+function Dailies:RemoveFilter()
+	ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", noPlayerFilter)
+end
 
 -------------------------------------------------------------------------
 -- EVENT: Addon is Initialized
@@ -519,7 +544,8 @@ function Dailies:OnEnable()
 	else dllocal_minimapicon:Show("Dailies_Broker"); dllocal_minimapicon:Show("Dailies_Broker") 
 	end
 
-
+	-- Add a chat filter to avoid getting the 'no player..' spam
+	Dailies:AddFilter()
 
 end
 
@@ -886,7 +912,10 @@ function Dailies.getFrame()
 	dllocal_filter_frame:SetPoint("TOPRIGHT", scanbutton,"TOPLEFT", -5, 2)
 	dllocal_filter_frame:AddItem(0, "|TInterface\\AddOns\\Dailies\\Images\\ignored:16|t No reputation filter")
 	if dllocal_repicons then 
-		for kr, r in pairs(dllocal_repicons) do
+		for kr, r in Dailies.spairs(dllocal_repicons, function(t,a,b) 	
+			local namea = GetFactionInfoByID(a);
+			local nameb = GetFactionInfoByID(b);
+			return namea < nameb end) do --sorted reps
 			local name, _, _, _, _, earnedValue = GetFactionInfoByID(kr)
 			dllocal_filter_frame:AddItem(kr, "|T" .. r .. ":16|t " .. name)
 		end
@@ -1200,7 +1229,7 @@ function Dailies.ShowTabContent()
 				local q = Dailies_Data.Quests[kq]
 
 				local expac = 2
-				if kq > 12000 then expac = 3 end
+				if kq > 12000 	or kq == 11153		or kq == 11472		or kq == 11940		or kq == 11960		or kq == 11945		or kq == 11391		then expac = 3 end
 
 				if (Dailies_Settings.showTBCDailies and expac == 2) or (Dailies_Settings.showWotLKDailies and expac == 3) then 
 					
@@ -1438,7 +1467,7 @@ function Dailies.ShowTabContent()
 							end
 							local rep = AceGUI:Create("InteractiveLabel")
 							rep:SetText(repText)
-							rep:SetWidth(50)
+							rep:SetWidth(60)
 							rep:SetJustifyH("RIGHT")
 							rep:SetFont(GameFontNormal:GetFont(), 12)
 							if tooltip ~= "" then 
@@ -1862,8 +1891,9 @@ function Dailies.ClassifyQuests()
 	
 	for kq, q in Dailies.spairs(Dailies_Data.Quests, function(t,a,b) 	return Dailies_Data.Toons[dllocal_charKey].Quests[a].Order < Dailies_Data.Toons[dllocal_charKey].Quests[b].Order end) do --all dailies
 
+		-- super dirty way to handle quest expac
 		local expac = 2
-		if kq > 12000 then expac = 3 end
+		if kq > 12000 	or kq == 11153		or kq == 11472		or kq == 11940		or kq == 11960		or kq == 11945		or kq == 11391		then expac = 3 end
 
 		if (Dailies_Settings.showTBCDailies and expac == 2) or (Dailies_Settings.showWotLKDailies and expac == 3) then 
 
@@ -2057,8 +2087,7 @@ function Dailies:OnCommReceived(prefix, message, distribution, sender)
 
 		--Someone requested the list of today's dailies
 		if message == "GET_TODAYS_DAILIES" or message == "GET_ALL_DAILIES" then
-			--print("Received "..message)
-			--for kq, q in pairs(dllocal_group) do 
+			
 			for kq, q in pairs(Dailies_Data.Quests) do 
 				if q.Factions[dllocal_faction] == 1 then
 					if (message == "GET_ALL_DAILIES") or (message == "GET_TODAYS_DAILIES" and (dllocal_group[kq] and q.TodayUntil and q.TodayUntil > (time(date("!*t")) + dllocal_tzdiff))) then -- today's daily or all dailies
@@ -2067,10 +2096,13 @@ function Dailies:OnCommReceived(prefix, message, distribution, sender)
 						--print("sending "..q.Title)
 						local ser = kq.."|"..Dailies.serialize(q):gsub(" = ", "="):gsub("   ", ""):gsub(" }", "}")
 						--print(ser)
-						if Dailies.CheckExists(sender) then Dailies:SendCommMessage(dllocal_prefix, ser, "WHISPER", sender) end
+						if Dailies.CheckExists(sender) and dllocal_abort_sending == false then Dailies:SendCommMessage(dllocal_prefix, ser, "WHISPER", sender) end
+
 					end
 				end
 			end
+			-- reset the flag for next person
+			dllocal_abort_sending = false
 
 		else
 			if message ~= nil then 

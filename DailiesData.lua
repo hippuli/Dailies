@@ -67,7 +67,6 @@ dllocal_group = {
      [12962] = { group = "Jewelcrafting";       expac=3},
      [12963] = { group = "Jewelcrafting";       expac=3},
      
-    [13190] = { group = "Wrath Heroic";   expac=3,    short = "OK", 	long = "Old Kingdom" },	
     [13255] = { group = "Wrath Heroic";   expac=3,    short = "OK", 	long = "Old Kingdom" },	
     [13254] = { group = "Wrath Heroic";   expac=3,    short = "AN", 	long = "Azjol-Nerub" },	
     [13249] = { group = "Wrath Heroic";   expac=3,    short = "Drak",	long = "Drak'Tharon Keep" },	
@@ -85,6 +84,11 @@ dllocal_group = {
     [13243] = { group = "Wrath Dungeon";   expac=3,    short = "CoS", 	long = "The Culling of Stratholme" },	
     [13240] = { group = "Wrath Dungeon";   expac=3,    short = "Oc", 	long = "The Oculus" },	
     [13241] = { group = "Wrath Dungeon";   expac=3,    short = "UP", 	long = "Utgarde Pinnacle" },
+
+    [13915] = { group = "Venomhide Ravasaur"; expac=3, },
+    [13903] = { group = "Venomhide Ravasaur"; expac=3, },
+    [13904] = { group = "Venomhide Ravasaur"; expac=3, },
+    [13905] = { group = "Venomhide Ravasaur"; expac=3, },
 
 }
 
@@ -202,6 +206,102 @@ dllocal_reps = {
     [11514] = { [1077] = 250 },
     [11877] = { [1077] = 250 },
 
+    -- WOTLK Kaluak
+    [11945] = { [1073] = 500 },
+    [11472] = { [1073] = 500 },
+    [11960] = { [1073] = 500 },
+
+    -- WOTLK Sons of Hodir
+    [12981] = { [1119] = 350 },
+    [12977] = { [1119] = 350 },
+    [13006] = { [1119] = 350 },
+    [12994] = { [1119] = 350 },
+    [13003] = { [1119] = 350 },
+    [13046] = { [1119] = 350 },
+ 
+    -- Argent Crusade
+    [13302] = { [1106] = 250 },
+    [12501] = { [1106] = 350 },
+    [13300] = { [1106] = 250 },
+    [12604] = { [1106] = 500 },
+    [12587] = { [1106] = 350 },
+    [12563] = { [1106] = 350 },
+    [12602] = { [1106] = 75 },
+    [12601] = { [1106] = 75 },
+
+    -- Ebon Blade
+    [13071] = { [1098] = 250 },
+    [12838] = { [1098] = 250 },
+    [13069] = { [1098] = 250 },
+    [12995] = { [1098] = 250 },
+    [12815] = { [1098] = 250 },
+    [12813] = { [1098] = 250 },
+
+    -- Wyrmrest
+    [13414] = { [1091] = 250 },
+    [12372] = { [1091] = 250 },
+    [11940] = { [1091] = 250 },
+
+    -- Oracles
+    [12705] = { [1105] = 350 },
+    [12762] = { [1105] = 350 },
+    [12726] = { [1105] = 250 },
+    [12735] = { [1105] = 250 },
+    [12704] = { [1105] = 250 },
+    [12737] = { [1105] = 250 },
+    [12761] = { [1105] = 350 },
+    [12736] = { [1105] = 250 },
+
+    -- Frenzyheart
+    [12741] = { [1104] = 250 },
+    [12734] = { [1104] = 250 },
+    [12703] = { [1104] = 350 },
+    [12732] = { [1104] = 250 },
+    [12758] = { [1104] = 250 },
+    [12760] = { [1104] = 350 },
+    [12759] = { [1104] = 350 },
+    [12702] = { [1104] = 250 },
+
+    -- Kirin Tor
+    [13830] = { [1090] = 250 },
+    [12958] = { [1090] = 25 },
+    [13836] = { [1090] = 250 },
+    [12962] = { [1090] = 25 },
+    [13832] = { [1090] = 250 },
+    [13102] = { [1090] = 150 },
+    [13833] = { [1090] = 250 },
+    [13834] = { [1090] = 250 },
+    [12960] = { [1090] = 25 },
+    [12963] = { [1090] = 25 },
+    [12961] = { [1090] = 25 },
+    [13103] = { [1090] = 150 },
+    [12959] = { [1090] = 25 },
+    [13107] = { [1090] = 150 },
+    [13113] = { [1090] = 150 },
+    [13115] = { [1090] = 150 },
+    [13244] = { [1090] = 75 },
+    [13100] = { [1090] = 150 },
+    [13114] = { [1090] = 150 },
+    [13116] = { [1090] = 150 },
+    [13243] = { [1090] = 75 },
+    [13101] = { [1090] = 150 },
+    [13241] = { [1090] = 75 },
+    [13240] = { [1090] = 75 },
+    [13250] = { [1090] = 75 },
+    [13249] = { [1090] = 75 },
+    [13247] = { [1090] = 75 },
+    [13112] = { [1090] = 150 },
+    [13254] = { [1090] = 75 },
+    [13251] = { [1090] = 75 },
+    [13256] = { [1090] = 75 },
+    [13246] = { [1090] = 75 },
+    [13255] = { [1090] = 75 },
+    [13248] = { [1090] = 75 },
+    [13253] = { [1090] = 75 },
+    [13252] = { [1090] = 75 },
+    [13245] = { [1090] = 75 },
+    [14199] = { [1090] = 75 },
+    
 }
 
 
@@ -217,6 +317,14 @@ dllocal_repicons = {
 	[1031] = 'Interface\\AddOns\\Dailies\\Images\\reps\\ability_hunter_pet_netherray',					-- Shatari Skyguard
 	[1038] = 'Interface\\AddOns\\Dailies\\Images\\reps\\inv_misc_apexis_crystal',						-- Ogri'la
 	[1077] = 'Interface\\AddOns\\Dailies\\Images\\reps\\inv_shield_48',									-- Shattered Sun Offensive
+    [1073] = 'Interface\\Icons\\achievement_reputation_tuskarr',                                        -- The Kalu'ak
+    [1119] = 'Interface\\Icons\\inv_misc_rune_14',                                                      -- The Sons of Hodir
+    [1106] = 'Interface\\Icons\\achievement_reputation_argentcrusader',                                 -- Argent Crusade
+    [1098] = 'Interface\\Icons\\achievement_reputation_knightsoftheebonblade',                          -- Ebon Blade
+    [1091] = 'Interface\\Icons\\achievement_reputation_wyrmresttemple',                                 -- Wyrmrest Accord
+    [1090] = 'Interface\\Icons\\achievement_reputation_kirintor',                                       -- Kirin Tor
+    [1105] = 'Interface\\Icons\\achievement_reputation_murlocoracle',                                   -- Oracles
+    [1104] = 'Interface\\Icons\\achievement_reputation_wolvar',                                         -- Frenzyheart
 }
 
 dllocal_repfaction = {

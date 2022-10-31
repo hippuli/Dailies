@@ -85,10 +85,10 @@ dllocal_group = {
     [13240] = { group = "Wrath Dungeon";   expac=3,    short = "Oc", 	long = "The Oculus" },	
     [13241] = { group = "Wrath Dungeon";   expac=3,    short = "UP", 	long = "Utgarde Pinnacle" },
 
-    [13915] = { group = "Venomhide Ravasaur"; expac=3, },
-    [13903] = { group = "Venomhide Ravasaur"; expac=3, },
-    [13904] = { group = "Venomhide Ravasaur"; expac=3, },
-    [13905] = { group = "Venomhide Ravasaur"; expac=3, },
+    [13915] = { group = "Venomhide Ravasaur"; expac=3,  faction="Horde"},
+    [13903] = { group = "Venomhide Ravasaur"; expac=3,  faction="Horde"},
+    [13904] = { group = "Venomhide Ravasaur"; expac=3,  faction="Horde"},
+    [13905] = { group = "Venomhide Ravasaur"; expac=3,  faction="Horde"},
 
 }
 

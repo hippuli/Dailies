@@ -8,9 +8,9 @@
 --
 -------------------------------------------------------------------------
 
--- Done in v029
---  - Removed the "All Things in Good Time" daily in Old Kingdom from the shared Heroic Dailies list
---  - Hopefully fixed an issue where someone logging in and out quickly would cause spam in the guild saying "No player named '<name>' is currently playing."
+-- Done in v030
+--  - Better handling of guild members logging off during sync
+--  - changes to the Ravasaur quest to only be Horde
 
 
 -------------------------------------------------------------------------
@@ -39,8 +39,6 @@ local dllocal_brokervalue = nil
 local dllocal_brokerlabel = nil
 
 local dllocal_filter_frame = nil		-- filter sub menu
-
-local dllocal_abort_sending = false		-- used to flag when abort is needed
 
 -- Frame variables
 local dllocal_initial = true			-- initial show of the frames
@@ -279,20 +277,28 @@ local capture = _G.ERR_CHAT_PLAYER_NOT_FOUND_S:gsub("%%s","(.+)")
 local function noPlayerFilter(self,event,msg,sender,...)
 	local noPlayer = msg:match(capture)
   	if noPlayer then
-	    -- abort any SendAddonMessage pending for that name
-	    dllocal_abort_sending = true
-	    return dllocal_abort_sending
+	    return true
   	else -- other system message just let it pass through
 	    return false, msg, sender, ...
   	end
 end
 
 function Dailies:AddFilter()
-	ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", noPlayerFilter)
+	-- re-adding an already added filter is automatically ignored
+	if not Dailies._filterActive then
+		ChatFrame_AddMessageEventFilter("CHAT_MSG_SYSTEM", noPlayerFilter)
+		Dailies._filterActive = true
+		--Dailies:Print("Filter |cff00ff00Active|r") -- DEBUG: comment out before packaging
+	end
 end
 
 function Dailies:RemoveFilter()
-	ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", noPlayerFilter)
+	-- trying to remove a non-existent filter doesn't error no extra checks needed
+	if Dailies._filterActive then
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_SYSTEM", noPlayerFilter)
+		Dailies._filterActive = nil
+		--Dailies:Print("Filter |cffff0000Inactive|r") -- DEBUG: comment out before packaging
+	end
 end
 
 -------------------------------------------------------------------------
@@ -330,6 +336,13 @@ function Dailies:OnEnable()
 	self:RegisterEvent("QUEST_COMPLETE")				--  used to trigger auto-complete (step 2)
 	self:RegisterEvent("QUEST_PROGRESS")				--  used to trigger auto-complete (step 1)
 	self:RegisterEvent("GOSSIP_SHOW")					--  used to trigger auto-complete and auto-accept
+	if IsInGuild() then
+		self:RegisterEvent("GUILD_ROSTER_UPDATE")
+		dllocal_inGuild = true
+	else
+		dllocal_inGuild = false
+		self:RegisterEvent("PLAYER_GUILD_UPDATE")
+	end
 	
 	local _,_,_,v = GetBuildInfo(); 
 	dllocal_expac = Dailies.Round(v/10000,0)
@@ -543,9 +556,6 @@ function Dailies:OnEnable()
 	then dllocal_minimapicon:Hide("Dailies_Broker"); dllocal_minimapicon:Hide("Dailies_Broker") 
 	else dllocal_minimapicon:Show("Dailies_Broker"); dllocal_minimapicon:Show("Dailies_Broker") 
 	end
-
-	-- Add a chat filter to avoid getting the 'no player..' spam
-	Dailies:AddFilter()
 
 end
 
@@ -797,6 +807,33 @@ function Dailies:UNIT_QUEST_LOG_CHANGED(event, unit)
 
 end
 
+-------------------------------------------------------------------------
+
+function Dailies:GUILD_ROSTER_UPDATE(event, canRequestUpdate)
+	self._guildOnlineCache = self._guildOnlineCache or {}
+	if canRequestUpdate then
+		GuildRoster()
+	end
+	for i=1, GetNumGuildMembers(true) do
+		local fullName, rank, rankIndex, level, class, zone, note, officernote, online = GetGuildRosterInfo(i)
+		if fullName and fullName ~= _G.UNKNOWNOBJECT then
+			self._guildOnlineCache[fullName] = online and true or nil
+		end
+	end
+end
+
+-------------------------------------------------------------------------
+
+function Dailies:PLAYER_GUILD_UPDATE(event, unit)
+	if unit and UnitIsUnit(unit,"player") then
+		if IsInGuild() then
+			dllocal_inGuild = true
+			self:RegisterEvent("GUILD_ROSTER_UPDATE")
+		else
+			dllocal_inGuild = false
+		end
+	end
+end
 
 -------------------------------------------------------------------------
 -- /dump Dailies.DailyResetTime()
@@ -2081,13 +2118,38 @@ end
 
 -------------------------------------------------------------------------
 
+function Dailies.sendProgress(id, bytesSent, bytesTotal)
+	local percentComplete = bytesSent/bytesTotal * 100
+	if percentComplete == 100 then
+		--Dailies:Print(format("%s: %d%%",id, percentComplete)) -- DEBUG: comment out before packaging
+		-- the system message involves a roundtrip to the server it's not instant when the player is not found
+	else
+		--Dailies:Print(format("%s: %.2f%%",id, percentComplete)) -- DEBUG: comment out before packaging
+	end
+	local recipient, part = id:match("([^:]+):(%d+)")
+	if Dailies._recipientQueue and Dailies._recipientQueue[recipient] then
+		local totalParts = Dailies._recipientQueue[recipient][1]
+		if part and tonumber(part) == totalParts and percentComplete == 100 then
+			Dailies._recipientQueue[recipient] = nil
+		end
+	end
+	C_Timer.After(1, function()
+		if not Dailies._recipientQueue or Dailies.count(Dailies._recipientQueue) == 0 then
+			Dailies:RemoveFilter()
+		end
+	end)
+end
+
+-------------------------------------------------------------------------
 function Dailies:OnCommReceived(prefix, message, distribution, sender)
 
 	if prefix == dllocal_prefix and sender ~= UnitName("player") then
 
 		--Someone requested the list of today's dailies
 		if message == "GET_TODAYS_DAILIES" or message == "GET_ALL_DAILIES" then
-			
+			Dailies._recipientQueue = Dailies._recipientQueue or {}
+			Dailies._recipientQueue[sender] = nil
+			local count, totalLen = 0, 0
 			for kq, q in pairs(Dailies_Data.Quests) do 
 				if q.Factions[dllocal_faction] == 1 then
 					if (message == "GET_ALL_DAILIES") or (message == "GET_TODAYS_DAILIES" and (dllocal_group[kq] and q.TodayUntil and q.TodayUntil > (time(date("!*t")) + dllocal_tzdiff))) then -- today's daily or all dailies
@@ -2095,15 +2157,20 @@ function Dailies:OnCommReceived(prefix, message, distribution, sender)
 						--send each daily back
 						--print("sending "..q.Title)
 						local ser = kq.."|"..Dailies.serialize(q):gsub(" = ", "="):gsub("   ", ""):gsub(" }", "}")
+						totalLen = totalLen + #ser
 						--print(ser)
-						if Dailies.CheckExists(sender) and dllocal_abort_sending == false then Dailies:SendCommMessage(dllocal_prefix, ser, "WHISPER", sender) end
-
+						if Dailies.CheckExists(sender) then
+							Dailies:AddFilter()
+							count = count + 1
+							local messageKey = format("%s:%d",sender,count)
+							Dailies:SendCommMessage(dllocal_prefix, ser, "WHISPER", sender, "NORMAL", Dailies.sendProgress, messageKey)
+						end
 					end
 				end
 			end
-			-- reset the flag for next person
-			dllocal_abort_sending = false
-
+			if count > 0 then -- we queued at least 1 message
+				Dailies._recipientQueue[sender] = {count, totalLen, GetTime()}
+			end
 		else
 			if message ~= nil then 
 				--print(sender)
@@ -2191,7 +2258,7 @@ function Dailies:OnCommReceived(prefix, message, distribution, sender)
 		end
 	elseif prefix ==  dllocal_prefix_version and sender ~= UnitName("player") then 
 		if message == 'VERSION' then 
-			if Dailies.CheckExists(sender) then Dailies:SendCommMessage(dllocal_prefix_version, dllocal_version, "WHISPER", sender) end
+			if Dailies.CheckExists(sender) then Dailies:SendCommMessage(dllocal_prefix_version, dllocal_version, "WHISPER", sender ) end
 		else
 			print("|cffff00ff[Dailies]|r |cffffd100" .. GetPlayerLink(sender, sender) .. "|r is using |cffffd100v" .. message .. "|r") 
 		end
@@ -2202,22 +2269,19 @@ end
 
 
 function Dailies.CheckExists(player)
-
-	GuildRoster()
-	local found = false
-	local index = 1
-	local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index);
-	while (name ~= nil) do
-		if online then 
-			if name == player .. "-" .. GetRealmName() then 
-				found = true
-				break
-			end
-		end
-		index = index + 1
-		name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, isSoREligible, standingID = GetGuildRosterInfo(index);
+	-- don't send update request when guild frame is open, it's already requesting / breaks show offline behavior
+	if not GuildFrame:IsShown() then
+		-- this is not instant we need to update our cache of online guildies at the respective event
+		-- the server response to request for new guild information is also throttled to ~10sec so data will never be 100% correct/real-time
+		GuildRoster()
 	end
-	return found
+	local fullName = player:match("([^%-]+%-.+)")
+	if not fullName then
+		fullName = format("%s-%s",player,GetNormalizedRealmName())
+	end
+	if fullName then -- check our last known good information
+		return Dailies._guildOnlineCache and Dailies._guildOnlineCache[fullName]
+	end
 end
 
 -------------------------------------------------------------------------

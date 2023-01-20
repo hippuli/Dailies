@@ -8,9 +8,10 @@
 --
 -------------------------------------------------------------------------
 
--- Done in v030
---  - Better handling of guild members logging off during sync
---  - changes to the Ravasaur quest to only be Horde
+-- Done in v031
+--  - Updated ToC for Phase 2
+--  - Updated Libraries
+--  - Updated to use the newer C_GossipInfo API
 
 
 -------------------------------------------------------------------------
@@ -746,51 +747,50 @@ function Dailies:GOSSIP_SHOW(event)
 
 	-- auto accepts
 	if Dailies_Settings.autoAcceptQuests then 
-		local arg = { GetGossipAvailableQuests() };
-		local i = 1
+		local arg = C_GossipInfo.GetAvailableQuests();
+	--	local i = 1
 		local ind = 1
-		while(arg[i]) do
+		while(arg[ind]) do
 			--check name against to do list
 			local qq = {};
-			qq.title = arg[i]; 		-- name
-			qq.freq = arg[i+3];	-- freq
-			--print(qq.title)
+			qq.title = arg[ind].title; 		-- name
+			qq.freq = arg[ind].frequency;	-- freq
+			qq.questID = arg[ind].questID
 
-			if qq.freq > 1 then --is a daily
-				
+			if qq.freq == 1 then --is a daily
 				for ktd, td in pairs(dllocal_questTabs.ToDo) do 
 					if Dailies_Data.Quests[ktd] and Dailies_Data.Quests[ktd].Title == qq.title then
-						SelectGossipAvailableQuest(ind)
+						C_GossipInfo.SelectAvailableQuest(qq.questID)
 					end
 				end
 			end
-			
-			i = i + 6 		-- clear the rest of the params for that quest
+
 			ind = ind + 1	-- quest index
 		end
 	end
 
 	-- auto completes
 	if Dailies_Settings.autoCompleteQuests then 
-		local arg = { GetGossipActiveQuests() };
-		local i = 1
+		local arg = C_GossipInfo.GetActiveQuests();
 		local ind = 1
-		while(arg[i]) do
+		while(arg[ind]) do
 			--check name against to do list
 			local qq = {};
-			qq.title = arg[i]; 		-- name
-			--print(qq.title)
+			qq.title = arg[ind].title; 		-- name
+			qq.questID = arg[ind].questID
+--			print(qq.title)
+--			print(qq.questID)
 
 			for ktd, td in pairs(dllocal_questTabs.ToDo) do 
 				--print(Dailies_Data.Quests[ktd].Title)
 				if Dailies_Data.Quests[ktd] and Dailies_Data.Quests[ktd].Title == qq.title then
 					if Dailies.ReadyToComplete(ktd) then 
-						SelectGossipActiveQuest(ind)
+--						print("TRYING")
+						C_GossipInfo.SelectActiveQuest(qq.questID)
 					end
-				end
+				end	
 			end
-			
-			i = i + 6 		-- clear the rest of the params for that quest
+
 			ind = ind + 1	-- quest index
 		end
 	end
@@ -884,9 +884,15 @@ function Dailies.getFrame()
 	dllocal_frame:SetStatusText(dllocal_statusText)
 	dllocal_frame:SetHeight(dllocal_fullHeight)
 	dllocal_frame:SetWidth(dllocal_fullWidth)
-	dllocal_frame.frame:SetMinResize(dllocal_fullWidth, dllocal_fullHeight)
-	dllocal_frame.frame:SetMaxResize(dllocal_fullWidth, 3000)
+
+	if dllocal_frame.frame.SetResizeBounds then
+		dllocal_frame.frame:SetResizeBounds(dllocal_fullWidth, dllocal_fullHeight)
+	else 
+		dllocal_frame.frame:SetMinResize(dllocal_fullWidth, dllocal_fullHeight)
+		dllocal_frame.frame:SetMaxResize(dllocal_fullWidth, 3000)
+	end
 	dllocal_frame:SetLayout("Flow")
+
 --	dllocal_frame:ClearAllPoints()
 --	dllocal_frame:SetPoint("TOPLEFT", UIParent, "TOPRIGHT", 0, 0)
 
@@ -2017,7 +2023,7 @@ function Dailies.ClassifyQuests()
 							if Dailies_Data.Toons[dllocal_charKey].RepFilter ~= nil then 
 								if dllocal_reps[kq] then 
 									for kr, r in Dailies.spairs(dllocal_reps[kq], function(t,a,b) 	return a < b end) do --sorted reps
-										if kq == 10110 then print(kr) end
+										--if kq == 10110 then print(kr) end
 										if kr ~= Dailies_Data.Toons[dllocal_charKey].RepFilter then skip = true end
 									end
 								else 

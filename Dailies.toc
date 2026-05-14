@@ -1,12 +1,16 @@
-## Interface: 30401
+## Interface: 20505, 30405, 40402
 ## Title: Dailies
-## Author: CixiDelmont
 ## Notes: Plan your Dailies
+## Author: CixiDelmont, Xerseus
+## Version: 44
+## Category: Quests
+## IconTexture: Interface\AddOns\Dailies\Images\dailies.tga
+## DefaultState: enabled
 ## SavedVariables: Dailies_Data, Dailies_Settings
-## SavedVariablesPerCharacter: 
-## Version: 031
 ## X-Website: https://warcraftratings.com
+
 embeds.xml
 Dailies.lua
 DailiesData.lua
-
+DailiesOptions.lua
+DailiesUtilities.lua

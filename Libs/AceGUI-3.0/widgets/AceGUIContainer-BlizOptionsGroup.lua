@@ -50,48 +50,48 @@ Methods
 
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetName()
-		self:SetTitle()
+ self:SetName()
+ self:SetTitle()
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["OnWidthSet"] = function(self, width)
-		local content = self.content
-		local contentwidth = width - 63
-		if contentwidth < 0 then
-			contentwidth = 0
-		end
-		content:SetWidth(contentwidth)
-		content.width = contentwidth
+ local content = self.content
+ local contentwidth = width - 63
+ if contentwidth < 0 then
+ contentwidth = 0
+ end
+ content:SetWidth(contentwidth)
+ content.width = contentwidth
 	end,
 
 	["OnHeightSet"] = function(self, height)
-		local content = self.content
-		local contentheight = height - 26
-		if contentheight < 0 then
-			contentheight = 0
-		end
-		content:SetHeight(contentheight)
-		content.height = contentheight
+ local content = self.content
+ local contentheight = height - 26
+ if contentheight < 0 then
+ contentheight = 0
+ end
+ content:SetHeight(contentheight)
+ content.height = contentheight
 	end,
 
 	["SetName"] = function(self, name, parent)
-		self.frame.name = name
-		self.frame.parent = parent
+ self.frame.name = name
+ self.frame.parent = parent
 	end,
 
 	["SetTitle"] = function(self, title)
-		local content = self.content
-		content:ClearAllPoints()
-		if not title or title == "" then
-			content:SetPoint("TOPLEFT", 10, -10)
-			self.label:SetText("")
-		else
-			content:SetPoint("TOPLEFT", 10, -40)
-			self.label:SetText(title)
-		end
-		content:SetPoint("BOTTOMRIGHT", -10, 10)
+ local content = self.content
+ content:ClearAllPoints()
+ if not title or title == "" then
+ content:SetPoint("TOPLEFT", 10, -10)
+ self.label:SetText("")
+ else
+ content:SetPoint("TOPLEFT", 10, -40)
+ self.label:SetText(title)
+ end
+ content:SetPoint("BOTTOMRIGHT", -10, 10)
 	end
 }
 
@@ -128,13 +128,13 @@ local function Constructor()
 	content:SetPoint("BOTTOMRIGHT", -10, 10)
 
 	local widget = {
-		label   = label,
-		frame   = frame,
-		content = content,
-		type    = Type
+ label = label,
+ frame = frame,
+ content = content,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	return AceGUI:RegisterAsContainer(widget)

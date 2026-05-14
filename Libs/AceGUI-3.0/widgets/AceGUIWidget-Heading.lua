@@ -16,22 +16,22 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetText()
-		self:SetFullWidth()
-		self:SetHeight(18)
+ self:SetText()
+ self:SetFullWidth()
+ self:SetHeight(18)
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetText"] = function(self, text)
-		self.label:SetText(text or "")
-		if text and text ~= "" then
-			self.left:SetPoint("RIGHT", self.label, "LEFT", -5, 0)
-			self.right:Show()
-		else
-			self.left:SetPoint("RIGHT", -3, 0)
-			self.right:Hide()
-		end
+ self.label:SetText(text or "")
+ if text and text ~= "" then
+ self.left:SetPoint("RIGHT", self.label, "LEFT", -5, 0)
+ self.right:Show()
+ else
+ self.left:SetPoint("RIGHT", -3, 0)
+ self.right:Hide()
+ end
 	end
 }
 
@@ -62,14 +62,14 @@ local function Constructor()
 	right:SetTexCoord(0.81, 0.94, 0.5, 1)
 
 	local widget = {
-		label = label,
-		left  = left,
-		right = right,
-		frame = frame,
-		type  = Type
+ label = label,
+ left = left,
+ right = right,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	return AceGUI:RegisterAsWidget(widget)

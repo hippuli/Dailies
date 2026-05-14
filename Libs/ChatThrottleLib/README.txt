@@ -16,18 +16,18 @@ Benefits of using ChatThrottleLib:
  * You can easily prioritize your traffic in three priorities
  
  * Communication to different peers is handled as individual flows. A long data
-   stream to "Alice" doesn't interrupt short bursts of traffic to "Bob".
+ stream to "Alice" doesn't interrupt short bursts of traffic to "Bob".
  
  * All AddOns using ChatThrottleLib use the same queues, so multiple addons 
-   can't cause an overload. Priorities ensure that real-time traffic is still
-   real-time. 
+ can't cause an overload. Priorities ensure that real-time traffic is still
+ real-time. 
 
 
 ChatThrottleLib does:
 
  * Round-robin traffic shaping of different communication paths
  * Prioritization of messages according to three predefined priorities: 
-   "BULK", "NORMAL" and "ALERT"
+ "BULK", "NORMAL" and "ALERT"
  * NO queueing of traffic needlessly. No lag introduced until it needs to be.
  * Adaptive throttling according to traffic bypassing the library
  * Adaptive throttling according to frame rate
@@ -35,9 +35,9 @@ ChatThrottleLib does:
 
 == APIs ==
 
- * ChatThrottleLib:SendChatMessage("prio", "prefix",   "text", "chattype", "language", "destination"[, "queueName"]);
+ * ChatThrottleLib:SendChatMessage("prio", "prefix", "text", "chattype", "language", "destination"[, "queueName"]);
 
- * ChatThrottleLib:SendAddonMessage("prio",    "prefix", "text", "chattype"[, "target"[, "queueName"]]);
+ * ChatThrottleLib:SendAddonMessage("prio", "prefix", "text", "chattype"[, "target"[, "queueName"]]);
  
 "prio" is one of "BULK", "NORMAL" and "ALERT".
 "prefix" in :SendChatMessage() is only used for traffic shaping purposes

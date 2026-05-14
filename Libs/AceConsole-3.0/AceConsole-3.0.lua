@@ -33,12 +33,12 @@ local tmp={}
 local function Print(self,frame,...)
 	local n=0
 	if self ~= AceConsole then
-		n=n+1
-		tmp[n] = "|cff33ff99"..tostring( self ).."|r:"
+ n=n+1
+ tmp[n] = "|cff33ff99"..tostring( self ).."|r:"
 	end
 	for i=1, select("#", ...) do
-		n=n+1
-		tmp[n] = tostring(select(i, ...))
+ n=n+1
+ tmp[n] = tostring(select(i, ...))
 	end
 	frame:AddMessage( tconcat(tmp," ",1,n) )
 end
@@ -50,9 +50,9 @@ end
 function AceConsole:Print(...)
 	local frame = ...
 	if type(frame) == "table" and frame.AddMessage then	-- Is first argument something with an .AddMessage member?
-		return Print(self, frame, select(2,...))
+ return Print(self, frame, select(2,...))
 	else
-		return Print(self, DEFAULT_CHAT_FRAME, ...)
+ return Print(self, DEFAULT_CHAT_FRAME, ...)
 	end
 end
 
@@ -65,9 +65,9 @@ end
 function AceConsole:Printf(...)
 	local frame = ...
 	if type(frame) == "table" and frame.AddMessage then	-- Is first argument something with an .AddMessage member?
-		return Print(self, frame, format(select(2,...)))
+ return Print(self, frame, format(select(2,...)))
 	else
-		return Print(self, DEFAULT_CHAT_FRAME, format(...))
+ return Print(self, DEFAULT_CHAT_FRAME, format(...))
 	end
 end
 
@@ -86,18 +86,18 @@ function AceConsole:RegisterChatCommand( command, func, persist )
 	local name = "ACECONSOLE_"..command:upper()
 
 	if type( func ) == "string" then
-		SlashCmdList[name] = function(input, editBox)
-			self[func](self, input, editBox)
-		end
+ SlashCmdList[name] = function(input, editBox)
+ self[func](self, input, editBox)
+ end
 	else
-		SlashCmdList[name] = func
+ SlashCmdList[name] = func
 	end
 	_G["SLASH_"..name.."1"] = "/"..command:lower()
 	AceConsole.commands[command] = name
 	-- non-persisting commands are registered for enabling disabling
 	if not persist then
-		if not AceConsole.weakcommands[self] then AceConsole.weakcommands[self] = {} end
-		AceConsole.weakcommands[self][command] = func
+ if not AceConsole.weakcommands[self] then AceConsole.weakcommands[self] = {} end
+ AceConsole.weakcommands[self][command] = func
 	end
 	return true
 end
@@ -107,10 +107,10 @@ end
 function AceConsole:UnregisterChatCommand( command )
 	local name = AceConsole.commands[command]
 	if name then
-		SlashCmdList[name] = nil
-		_G["SLASH_" .. name .. "1"] = nil
-		hash_SlashCmdList["/" .. command:upper()] = nil
-		AceConsole.commands[command] = nil
+ SlashCmdList[name] = nil
+ _G["SLASH_" .. name .. "1"] = nil
+ hash_SlashCmdList["/" .. command:upper()] = nil
+ AceConsole.commands[command] = nil
 	end
 end
 
@@ -121,11 +121,11 @@ function AceConsole:IterateChatCommands() return pairs(AceConsole.commands) end
 
 local function nils(n, ...)
 	if n>1 then
-		return nil, nils(n-1, ...)
+ return nil, nils(n-1, ...)
 	elseif n==1 then
-		return nil, ...
+ return nil, ...
 	else
-		return ...
+ return ...
 	end
 end
 
@@ -134,7 +134,7 @@ end
 -- Treats quoted strings and itemlinks as non-spaced.
 -- @param str The raw argument string
 -- @param numargs How many arguments to get (default 1)
--- @param startpos Where in the string to start scanning (default  1)
+-- @param startpos Where in the string to start scanning (default 1)
 -- @return Returns arg1, arg2, ..., nextposition\\
 -- Missing arguments will be returned as nils. 'nextposition' is returned as 1e9 at the end of the string.
 function AceConsole:GetArgs(str, numargs, startpos)
@@ -146,57 +146,57 @@ function AceConsole:GetArgs(str, numargs, startpos)
 	-- find start of new arg
 	pos = strfind(str, "[^ ]", pos)
 	if not pos then	-- whoops, end of string
-		return nils(numargs, 1e9)
+ return nils(numargs, 1e9)
 	end
 
 	if numargs<1 then
-		return pos
+ return pos
 	end
 
 	-- quoted or space separated? find out which pattern to use
 	local delim_or_pipe
 	local ch = strsub(str, pos, pos)
 	if ch=='"' then
-		pos = pos + 1
-		delim_or_pipe='([|"])'
+ pos = pos + 1
+ delim_or_pipe='([|"])'
 	elseif ch=="'" then
-		pos = pos + 1
-		delim_or_pipe="([|'])"
+ pos = pos + 1
+ delim_or_pipe="([|'])"
 	else
-		delim_or_pipe="([| ])"
+ delim_or_pipe="([| ])"
 	end
 
 	startpos = pos
 
 	while true do
-		-- find delimiter or hyperlink
-		local _
-		pos,_,ch = strfind(str, delim_or_pipe, pos)
+ -- find delimiter or hyperlink
+ local _
+ pos,_,ch = strfind(str, delim_or_pipe, pos)
 
-		if not pos then break end
+ if not pos then break end
 
-		if ch=="|" then
-			-- some kind of escape
+ if ch=="|" then
+ -- some kind of escape
 
-			if strsub(str,pos,pos+1)=="|H" then
-				-- It's a |H....|hhyper link!|h
-				pos=strfind(str, "|h", pos+2)	-- first |h
-				if not pos then break end
+ if strsub(str,pos,pos+1)=="|H" then
+ -- It's a |H....|hhyper link!|h
+ pos=strfind(str, "|h", pos+2)	-- first |h
+ if not pos then break end
 
-				pos=strfind(str, "|h", pos+2)	-- second |h
-				if not pos then break end
-			elseif strsub(str,pos, pos+1) == "|T" then
-				-- It's a |T....|t  texture
-				pos=strfind(str, "|t", pos+2)
-				if not pos then break end
-			end
+ pos=strfind(str, "|h", pos+2)	-- second |h
+ if not pos then break end
+ elseif strsub(str,pos, pos+1) == "|T" then
+ -- It's a |T....|t texture
+ pos=strfind(str, "|t", pos+2)
+ if not pos then break end
+ end
 
-			pos=pos+2 -- skip past this escape (last |h if it was a hyperlink)
+ pos=pos+2 -- skip past this escape (last |h if it was a hyperlink)
 
-		else
-			-- found delimiter, done with this arg
-			return strsub(str, startpos, pos-1), AceConsole:GetArgs(str, numargs-1, pos+1)
-		end
+ else
+ -- found delimiter, done with this arg
+ return strsub(str, startpos, pos-1), AceConsole:GetArgs(str, numargs-1, pos+1)
+ end
 
 	end
 
@@ -219,7 +219,7 @@ local mixins = {
 -- @param target target object to embed AceBucket in
 function AceConsole:Embed( target )
 	for k, v in pairs( mixins ) do
-		target[v] = self[v]
+ target[v] = self[v]
 	end
 	self.embeds[target] = true
 	return target
@@ -227,17 +227,17 @@ end
 
 function AceConsole:OnEmbedEnable( target )
 	if AceConsole.weakcommands[target] then
-		for command, func in pairs( AceConsole.weakcommands[target] ) do
-			target:RegisterChatCommand( command, func, false, true ) -- nonpersisting and silent registry
-		end
+ for command, func in pairs( AceConsole.weakcommands[target] ) do
+ target:RegisterChatCommand( command, func, false, true ) -- nonpersisting and silent registry
+ end
 	end
 end
 
 function AceConsole:OnEmbedDisable( target )
 	if AceConsole.weakcommands[target] then
-		for command, func in pairs( AceConsole.weakcommands[target] ) do
-			target:UnregisterChatCommand( command ) -- TODO: this could potentially unregister a command from another application in case of command conflicts. Do we care?
-		end
+ for command, func in pairs( AceConsole.weakcommands[target] ) do
+ target:UnregisterChatCommand( command ) -- TODO: this could potentially unregister a command from another application in case of command conflicts. Do we care?
+ end
 	end
 end
 

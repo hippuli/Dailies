@@ -27,20 +27,20 @@ end
 
 local function Keybinding_OnClick(frame, button)
 	if button == "LeftButton" or button == "RightButton" then
-		local self = frame.obj
-		if self.waitingForKey then
-			frame:EnableKeyboard(false)
-			frame:EnableMouseWheel(false)
-			self.msgframe:Hide()
-			frame:UnlockHighlight()
-			self.waitingForKey = nil
-		else
-			frame:EnableKeyboard(true)
-			frame:EnableMouseWheel(true)
-			self.msgframe:Show()
-			frame:LockHighlight()
-			self.waitingForKey = true
-		end
+ local self = frame.obj
+ if self.waitingForKey then
+ frame:EnableKeyboard(false)
+ frame:EnableMouseWheel(false)
+ self.msgframe:Hide()
+ frame:UnlockHighlight()
+ self.waitingForKey = nil
+ else
+ frame:EnableKeyboard(true)
+ frame:EnableMouseWheel(true)
+ self.msgframe:Show()
+ frame:LockHighlight()
+ self.waitingForKey = true
+ end
 	end
 	AceGUI:ClearFocus()
 end
@@ -54,44 +54,44 @@ local ignoreKeys = {
 local function Keybinding_OnKeyDown(frame, key)
 	local self = frame.obj
 	if self.waitingForKey then
-		local keyPressed = key
-		if keyPressed == "ESCAPE" then
-			keyPressed = ""
-		else
-			if ignoreKeys[keyPressed] then return end
-			if IsShiftKeyDown() then
-				keyPressed = "SHIFT-"..keyPressed
-			end
-			if IsControlKeyDown() then
-				keyPressed = "CTRL-"..keyPressed
-			end
-			if IsAltKeyDown() then
-				keyPressed = "ALT-"..keyPressed
-			end
-		end
+ local keyPressed = key
+ if keyPressed == "ESCAPE" then
+ keyPressed = ""
+ else
+ if ignoreKeys[keyPressed] then return end
+ if IsShiftKeyDown() then
+ keyPressed = "SHIFT-"..keyPressed
+ end
+ if IsControlKeyDown() then
+ keyPressed = "CTRL-"..keyPressed
+ end
+ if IsAltKeyDown() then
+ keyPressed = "ALT-"..keyPressed
+ end
+ end
 
-		frame:EnableKeyboard(false)
-		frame:EnableMouseWheel(false)
-		self.msgframe:Hide()
-		frame:UnlockHighlight()
-		self.waitingForKey = nil
+ frame:EnableKeyboard(false)
+ frame:EnableMouseWheel(false)
+ self.msgframe:Hide()
+ frame:UnlockHighlight()
+ self.waitingForKey = nil
 
-		if not self.disabled then
-			self:SetKey(keyPressed)
-			self:Fire("OnKeyChanged", keyPressed)
-		end
+ if not self.disabled then
+ self:SetKey(keyPressed)
+ self:Fire("OnKeyChanged", keyPressed)
+ end
 	end
 end
 
 local function Keybinding_OnMouseDown(frame, button)
 	if button == "LeftButton" or button == "RightButton" then
-		return
+ return
 	elseif button == "MiddleButton" then
-		button = "BUTTON3"
+ button = "BUTTON3"
 	elseif button == "Button4" then
-		button = "BUTTON4"
+ button = "BUTTON4"
 	elseif button == "Button5" then
-		button = "BUTTON5"
+ button = "BUTTON5"
 	end
 	Keybinding_OnKeyDown(frame, button)
 end
@@ -99,9 +99,9 @@ end
 local function Keybinding_OnMouseWheel(frame, direction)
 	local button
 	if direction >= 0 then
-		button = "MOUSEWHEELUP"
+ button = "MOUSEWHEELUP"
 	else
-		button = "MOUSEWHEELDOWN"
+ button = "MOUSEWHEELDOWN"
 	end
 	Keybinding_OnKeyDown(frame, button)
 end
@@ -111,56 +111,56 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetWidth(200)
-		self:SetLabel("")
-		self:SetKey("")
-		self.waitingForKey = nil
-		self.msgframe:Hide()
-		self:SetDisabled(false)
-		self.button:EnableKeyboard(false)
-		self.button:EnableMouseWheel(false)
+ self:SetWidth(200)
+ self:SetLabel("")
+ self:SetKey("")
+ self.waitingForKey = nil
+ self.msgframe:Hide()
+ self:SetDisabled(false)
+ self.button:EnableKeyboard(false)
+ self.button:EnableMouseWheel(false)
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetDisabled"] = function(self, disabled)
-		self.disabled = disabled
-		if disabled then
-			self.button:Disable()
-			self.label:SetTextColor(0.5,0.5,0.5)
-		else
-			self.button:Enable()
-			self.label:SetTextColor(1,1,1)
-		end
+ self.disabled = disabled
+ if disabled then
+ self.button:Disable()
+ self.label:SetTextColor(0.5,0.5,0.5)
+ else
+ self.button:Enable()
+ self.label:SetTextColor(1,1,1)
+ end
 	end,
 
 	["SetKey"] = function(self, key)
-		if (key or "") == "" then
-			self.button:SetText(NOT_BOUND)
-			self.button:SetNormalFontObject("GameFontNormal")
-		else
-			self.button:SetText(key)
-			self.button:SetNormalFontObject("GameFontHighlight")
-		end
+ if (key or "") == "" then
+ self.button:SetText(NOT_BOUND)
+ self.button:SetNormalFontObject("GameFontNormal")
+ else
+ self.button:SetText(key)
+ self.button:SetNormalFontObject("GameFontHighlight")
+ end
 	end,
 
 	["GetKey"] = function(self)
-		local key = self.button:GetText()
-		if key == NOT_BOUND then
-			key = nil
-		end
-		return key
+ local key = self.button:GetText()
+ if key == NOT_BOUND then
+ key = nil
+ end
+ return key
 	end,
 
 	["SetLabel"] = function(self, label)
-		self.label:SetText(label or "")
-		if (label or "") == "" then
-			self.alignoffset = nil
-			self:SetHeight(24)
-		else
-			self.alignoffset = 30
-			self:SetHeight(44)
-		end
+ self.label:SetText(label or "")
+ if (label or "") == "" then
+ self.alignoffset = nil
+ self:SetHeight(24)
+ else
+ self.alignoffset = 30
+ self:SetHeight(44)
+ end
 	end,
 }
 
@@ -168,7 +168,7 @@ local methods = {
 Constructor
 -------------------------------------------------------------------------------]]
 
-local ControlBackdrop  = {
+local ControlBackdrop = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 	tile = true, tileSize = 16, edgeSize = 16,
@@ -227,15 +227,15 @@ local function Constructor()
 	msgframe:Hide()
 
 	local widget = {
-		button      = button,
-		label       = label,
-		msgframe    = msgframe,
-		frame       = frame,
-		alignoffset = 30,
-		type        = Type
+ button = button,
+ label = label,
+ msgframe = msgframe,
+ frame = frame,
+ alignoffset = 30,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 	button.obj = widget
 

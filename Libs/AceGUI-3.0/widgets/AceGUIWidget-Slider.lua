@@ -20,20 +20,20 @@ Support functions
 local function UpdateText(self)
 	local value = self.value or 0
 	if self.ispercent then
-		self.editbox:SetText(("%s%%"):format(floor(value * 1000 + 0.5) / 10))
+ self.editbox:SetText(("%s%%"):format(floor(value * 1000 + 0.5) / 10))
 	else
-		self.editbox:SetText(floor(value * 100 + 0.5) / 100)
+ self.editbox:SetText(floor(value * 100 + 0.5) / 100)
 	end
 end
 
 local function UpdateLabels(self)
 	local min_value, max_value = (self.min or 0), (self.max or 100)
 	if self.ispercent then
-		self.lowtext:SetFormattedText("%s%%", (min_value * 100))
-		self.hightext:SetFormattedText("%s%%", (max_value * 100))
+ self.lowtext:SetFormattedText("%s%%", (min_value * 100))
+ self.hightext:SetFormattedText("%s%%", (max_value * 100))
 	else
-		self.lowtext:SetText(min_value)
-		self.hightext:SetText(max_value)
+ self.lowtext:SetText(min_value)
+ self.hightext:SetText(max_value)
 	end
 end
 
@@ -56,17 +56,17 @@ end
 local function Slider_OnValueChanged(frame, newvalue)
 	local self = frame.obj
 	if not frame.setup then
-		if self.step and self.step > 0 then
-			local min_value = self.min or 0
-			newvalue = floor((newvalue - min_value) / self.step + 0.5) * self.step + min_value
-		end
-		if newvalue ~= self.value and not self.disabled then
-			self.value = newvalue
-			self:Fire("OnValueChanged", newvalue)
-		end
-		if self.value then
-			UpdateText(self)
-		end
+ if self.step and self.step > 0 then
+ local min_value = self.min or 0
+ newvalue = floor((newvalue - min_value) / self.step + 0.5) * self.step + min_value
+ end
+ if newvalue ~= self.value and not self.disabled then
+ self.value = newvalue
+ self:Fire("OnValueChanged", newvalue)
+ end
+ if self.value then
+ UpdateText(self)
+ end
 	end
 end
 
@@ -78,13 +78,13 @@ end
 local function Slider_OnMouseWheel(frame, v)
 	local self = frame.obj
 	if not self.disabled then
-		local value = self.value
-		if v > 0 then
-			value = min(value + (self.step or 1), self.max)
-		else
-			value = max(value - (self.step or 1), self.min)
-		end
-		self.slider:SetValue(value)
+ local value = self.value
+ if v > 0 then
+ value = min(value + (self.step or 1), self.max)
+ else
+ value = max(value - (self.step or 1), self.min)
+ end
+ self.slider:SetValue(value)
 	end
 end
 
@@ -96,16 +96,16 @@ local function EditBox_OnEnterPressed(frame)
 	local self = frame.obj
 	local value = frame:GetText()
 	if self.ispercent then
-		value = value:gsub('%%', '')
-		value = tonumber(value) / 100
+ value = value:gsub('%%', '')
+ value = tonumber(value) / 100
 	else
-		value = tonumber(value)
+ value = tonumber(value)
 	end
 
 	if value then
-		PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
-		self.slider:SetValue(value)
-		self:Fire("OnMouseUp", value)
+ PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+ self.slider:SetValue(value)
+ self:Fire("OnMouseUp", value)
 	end
 end
 
@@ -122,81 +122,81 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetWidth(200)
-		self:SetHeight(44)
-		self:SetDisabled(false)
-		self:SetIsPercent(nil)
-		self:SetSliderValues(0,100,1)
-		self:SetValue(0)
-		self.slider:EnableMouseWheel(false)
+ self:SetWidth(200)
+ self:SetHeight(44)
+ self:SetDisabled(false)
+ self:SetIsPercent(nil)
+ self:SetSliderValues(0,100,1)
+ self:SetValue(0)
+ self.slider:EnableMouseWheel(false)
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetDisabled"] = function(self, disabled)
-		self.disabled = disabled
-		if disabled then
-			self.slider:EnableMouse(false)
-			self.label:SetTextColor(.5, .5, .5)
-			self.hightext:SetTextColor(.5, .5, .5)
-			self.lowtext:SetTextColor(.5, .5, .5)
-			--self.valuetext:SetTextColor(.5, .5, .5)
-			self.editbox:SetTextColor(.5, .5, .5)
-			self.editbox:EnableMouse(false)
-			self.editbox:ClearFocus()
-		else
-			self.slider:EnableMouse(true)
-			self.label:SetTextColor(1, .82, 0)
-			self.hightext:SetTextColor(1, 1, 1)
-			self.lowtext:SetTextColor(1, 1, 1)
-			--self.valuetext:SetTextColor(1, 1, 1)
-			self.editbox:SetTextColor(1, 1, 1)
-			self.editbox:EnableMouse(true)
-		end
+ self.disabled = disabled
+ if disabled then
+ self.slider:EnableMouse(false)
+ self.label:SetTextColor(.5, .5, .5)
+ self.hightext:SetTextColor(.5, .5, .5)
+ self.lowtext:SetTextColor(.5, .5, .5)
+ --self.valuetext:SetTextColor(.5, .5, .5)
+ self.editbox:SetTextColor(.5, .5, .5)
+ self.editbox:EnableMouse(false)
+ self.editbox:ClearFocus()
+ else
+ self.slider:EnableMouse(true)
+ self.label:SetTextColor(1, .82, 0)
+ self.hightext:SetTextColor(1, 1, 1)
+ self.lowtext:SetTextColor(1, 1, 1)
+ --self.valuetext:SetTextColor(1, 1, 1)
+ self.editbox:SetTextColor(1, 1, 1)
+ self.editbox:EnableMouse(true)
+ end
 	end,
 
 	["SetValue"] = function(self, value)
-		self.slider.setup = true
-		self.slider:SetValue(value)
-		self.value = value
-		UpdateText(self)
-		self.slider.setup = nil
+ self.slider.setup = true
+ self.slider:SetValue(value)
+ self.value = value
+ UpdateText(self)
+ self.slider.setup = nil
 	end,
 
 	["GetValue"] = function(self)
-		return self.value
+ return self.value
 	end,
 
 	["SetLabel"] = function(self, text)
-		self.label:SetText(text)
+ self.label:SetText(text)
 	end,
 
 	["SetSliderValues"] = function(self, min_value, max_value, step)
-		local frame = self.slider
-		frame.setup = true
-		self.min = min_value
-		self.max = max_value
-		self.step = step
-		frame:SetMinMaxValues(min_value or 0,max_value or 100)
-		UpdateLabels(self)
-		frame:SetValueStep(step or 1)
-		if self.value then
-			frame:SetValue(self.value)
-		end
-		frame.setup = nil
+ local frame = self.slider
+ frame.setup = true
+ self.min = min_value
+ self.max = max_value
+ self.step = step
+ frame:SetMinMaxValues(min_value or 0,max_value or 100)
+ UpdateLabels(self)
+ frame:SetValueStep(step or 1)
+ if self.value then
+ frame:SetValue(self.value)
+ end
+ frame.setup = nil
 	end,
 
 	["SetIsPercent"] = function(self, value)
-		self.ispercent = value
-		UpdateLabels(self)
-		UpdateText(self)
+ self.ispercent = value
+ UpdateLabels(self)
+ UpdateText(self)
 	end
 }
 
 --[[-----------------------------------------------------------------------------
 Constructor
 -------------------------------------------------------------------------------]]
-local SliderBackdrop  = {
+local SliderBackdrop = {
 	bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
 	edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
 	tile = true, tileSize = 8, edgeSize = 8,
@@ -260,17 +260,17 @@ local function Constructor()
 	editbox:SetScript("OnEscapePressed", EditBox_OnEscapePressed)
 
 	local widget = {
-		label       = label,
-		slider      = slider,
-		lowtext     = lowtext,
-		hightext    = hightext,
-		editbox     = editbox,
-		alignoffset = 25,
-		frame       = frame,
-		type        = Type
+ label = label,
+ slider = slider,
+ lowtext = lowtext,
+ hightext = hightext,
+ editbox = editbox,
+ alignoffset = 25,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 	slider.obj, editbox.obj = widget, widget
 

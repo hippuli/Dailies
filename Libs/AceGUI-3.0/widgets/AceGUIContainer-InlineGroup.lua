@@ -17,48 +17,48 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetWidth(300)
-		self:SetHeight(100)
-		self:SetTitle("")
+ self:SetWidth(300)
+ self:SetHeight(100)
+ self:SetTitle("")
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetTitle"] = function(self,title)
-		self.titletext:SetText(title)
+ self.titletext:SetText(title)
 	end,
 
 
 	["LayoutFinished"] = function(self, width, height)
-		if self.noAutoHeight then return end
-		self:SetHeight((height or 0) + 40)
+ if self.noAutoHeight then return end
+ self:SetHeight((height or 0) + 40)
 	end,
 
 	["OnWidthSet"] = function(self, width)
-		local content = self.content
-		local contentwidth = width - 20
-		if contentwidth < 0 then
-			contentwidth = 0
-		end
-		content:SetWidth(contentwidth)
-		content.width = contentwidth
+ local content = self.content
+ local contentwidth = width - 20
+ if contentwidth < 0 then
+ contentwidth = 0
+ end
+ content:SetWidth(contentwidth)
+ content.width = contentwidth
 	end,
 
 	["OnHeightSet"] = function(self, height)
-		local content = self.content
-		local contentheight = height - 20
-		if contentheight < 0 then
-			contentheight = 0
-		end
-		content:SetHeight(contentheight)
-		content.height = contentheight
+ local content = self.content
+ local contentheight = height - 20
+ if contentheight < 0 then
+ contentheight = 0
+ end
+ content:SetHeight(contentheight)
+ content.height = contentheight
 	end
 }
 
 --[[-----------------------------------------------------------------------------
 Constructor
 -------------------------------------------------------------------------------]]
-local PaneBackdrop  = {
+local PaneBackdrop = {
 	bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 	tile = true, tileSize = 16, edgeSize = 16,
@@ -88,13 +88,13 @@ local function Constructor()
 	content:SetPoint("BOTTOMRIGHT", -10, 10)
 
 	local widget = {
-		frame     = frame,
-		content   = content,
-		titletext = titletext,
-		type      = Type
+ frame = frame,
+ content = content,
+ titletext = titletext,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	return AceGUI:RegisterAsContainer(widget)

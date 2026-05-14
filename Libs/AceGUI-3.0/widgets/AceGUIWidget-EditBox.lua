@@ -24,18 +24,18 @@ end
 
 function _G.AceGUIEditBoxInsertLink(text)
 	for i = 1, AceGUI:GetWidgetCount(Type) do
-		local editbox = _G["AceGUI-3.0EditBox"..i]
-		if editbox and editbox:IsVisible() and editbox:HasFocus() then
-			editbox:Insert(text)
-			return true
-		end
+ local editbox = _G["AceGUI-3.0EditBox"..i]
+ if editbox and editbox:IsVisible() and editbox:HasFocus() then
+ editbox:Insert(text)
+ return true
+ end
 	end
 end
 
 local function ShowButton(self)
 	if not self.disablebutton then
-		self.button:Show()
-		self.editbox:SetTextInsets(0, 20, 3, 3)
+ self.button:Show()
+ self.editbox:SetTextInsets(0, 20, 3, 3)
 	end
 end
 
@@ -69,8 +69,8 @@ local function EditBox_OnEnterPressed(frame)
 	local value = frame:GetText()
 	local cancel = self:Fire("OnEnterPressed", value)
 	if not cancel then
-		PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
-		HideButton(self)
+ PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+ HideButton(self)
 	end
 end
 
@@ -79,18 +79,18 @@ local function EditBox_OnReceiveDrag(frame)
 	local type, id, info = GetCursorInfo()
 	local name
 	if type == "item" then
-		name = info
+ name = info
 	elseif type == "spell" then
-		name = GetSpellInfo(id, info)
+ name = GetSpellInfo(id, info)
 	elseif type == "macro" then
-		name = GetMacroInfo(id)
+ name = GetMacroInfo(id)
 	end
 	if name then
-		self:SetText(name)
-		self:Fire("OnEnterPressed", name)
-		ClearCursor()
-		HideButton(self)
-		AceGUI:ClearFocus()
+ self:SetText(name)
+ self:Fire("OnEnterPressed", name)
+ ClearCursor()
+ HideButton(self)
+ AceGUI:ClearFocus()
 	end
 end
 
@@ -98,9 +98,9 @@ local function EditBox_OnTextChanged(frame)
 	local self = frame.obj
 	local value = frame:GetText()
 	if tostring(value) ~= tostring(self.lasttext) then
-		self:Fire("OnTextChanged", value)
-		self.lasttext = value
-		ShowButton(self)
+ self:Fire("OnTextChanged", value)
+ self.lasttext = value
+ ShowButton(self)
 	end
 end
 
@@ -119,85 +119,85 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		-- height is controlled by SetLabel
-		self:SetWidth(200)
-		self:SetDisabled(false)
-		self:SetLabel()
-		self:SetText()
-		self:DisableButton(false)
-		self:SetMaxLetters(0)
+ -- height is controlled by SetLabel
+ self:SetWidth(200)
+ self:SetDisabled(false)
+ self:SetLabel()
+ self:SetText()
+ self:DisableButton(false)
+ self:SetMaxLetters(0)
 	end,
 
 	["OnRelease"] = function(self)
-		self:ClearFocus()
+ self:ClearFocus()
 	end,
 
 	["SetDisabled"] = function(self, disabled)
-		self.disabled = disabled
-		if disabled then
-			self.editbox:EnableMouse(false)
-			self.editbox:ClearFocus()
-			self.editbox:SetTextColor(0.5,0.5,0.5)
-			self.label:SetTextColor(0.5,0.5,0.5)
-		else
-			self.editbox:EnableMouse(true)
-			self.editbox:SetTextColor(1,1,1)
-			self.label:SetTextColor(1,.82,0)
-		end
+ self.disabled = disabled
+ if disabled then
+ self.editbox:EnableMouse(false)
+ self.editbox:ClearFocus()
+ self.editbox:SetTextColor(0.5,0.5,0.5)
+ self.label:SetTextColor(0.5,0.5,0.5)
+ else
+ self.editbox:EnableMouse(true)
+ self.editbox:SetTextColor(1,1,1)
+ self.label:SetTextColor(1,.82,0)
+ end
 	end,
 
 	["SetText"] = function(self, text)
-		self.lasttext = text or ""
-		self.editbox:SetText(text or "")
-		self.editbox:SetCursorPosition(0)
-		HideButton(self)
+ self.lasttext = text or ""
+ self.editbox:SetText(text or "")
+ self.editbox:SetCursorPosition(0)
+ HideButton(self)
 	end,
 
 	["GetText"] = function(self, text)
-		return self.editbox:GetText()
+ return self.editbox:GetText()
 	end,
 
 	["SetLabel"] = function(self, text)
-		if text and text ~= "" then
-			self.label:SetText(text)
-			self.label:Show()
-			self.editbox:SetPoint("TOPLEFT",self.frame,"TOPLEFT",7,-18)
-			self:SetHeight(44)
-			self.alignoffset = 30
-		else
-			self.label:SetText("")
-			self.label:Hide()
-			self.editbox:SetPoint("TOPLEFT",self.frame,"TOPLEFT",7,0)
-			self:SetHeight(26)
-			self.alignoffset = 12
-		end
+ if text and text ~= "" then
+ self.label:SetText(text)
+ self.label:Show()
+ self.editbox:SetPoint("TOPLEFT",self.frame,"TOPLEFT",7,-18)
+ self:SetHeight(44)
+ self.alignoffset = 30
+ else
+ self.label:SetText("")
+ self.label:Hide()
+ self.editbox:SetPoint("TOPLEFT",self.frame,"TOPLEFT",7,0)
+ self:SetHeight(26)
+ self.alignoffset = 12
+ end
 	end,
 
 	["DisableButton"] = function(self, disabled)
-		self.disablebutton = disabled
-		if disabled then
-			HideButton(self)
-		end
+ self.disablebutton = disabled
+ if disabled then
+ HideButton(self)
+ end
 	end,
 
 	["SetMaxLetters"] = function (self, num)
-		self.editbox:SetMaxLetters(num or 0)
+ self.editbox:SetMaxLetters(num or 0)
 	end,
 
 	["ClearFocus"] = function(self)
-		self.editbox:ClearFocus()
-		self.frame:SetScript("OnShow", nil)
+ self.editbox:ClearFocus()
+ self.frame:SetScript("OnShow", nil)
 	end,
 
 	["SetFocus"] = function(self)
-		self.editbox:SetFocus()
-		if not self.frame:IsShown() then
-			self.frame:SetScript("OnShow", Frame_OnShowFocus)
-		end
+ self.editbox:SetFocus()
+ if not self.frame:IsShown() then
+ self.frame:SetScript("OnShow", Frame_OnShowFocus)
+ end
 	end,
 
 	["HighlightText"] = function(self, from, to)
-		self.editbox:HighlightText(from, to)
+ self.editbox:HighlightText(from, to)
 	end
 }
 
@@ -205,7 +205,7 @@ local methods = {
 Constructor
 -------------------------------------------------------------------------------]]
 local function Constructor()
-	local num  = AceGUI:GetNextWidgetNum(Type)
+	local num = AceGUI:GetNextWidgetNum(Type)
 	local frame = CreateFrame("Frame", nil, UIParent)
 	frame:Hide()
 
@@ -241,15 +241,15 @@ local function Constructor()
 	button:Hide()
 
 	local widget = {
-		alignoffset = 30,
-		editbox     = editbox,
-		label       = label,
-		button      = button,
-		frame       = frame,
-		type        = Type
+ alignoffset = 30,
+ editbox = editbox,
+ label = label,
+ button = button,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 	editbox.obj, button.obj = widget, widget
 

@@ -27,78 +27,78 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self.dropdown:SetText("")
-		self:SetDropdownWidth(200)
-		self:SetTitle("")
+ self.dropdown:SetText("")
+ self:SetDropdownWidth(200)
+ self:SetTitle("")
 	end,
 
 	["OnRelease"] = function(self)
-		self.dropdown.list = nil
-		self.status = nil
-		for k in pairs(self.localstatus) do
-			self.localstatus[k] = nil
-		end
+ self.dropdown.list = nil
+ self.status = nil
+ for k in pairs(self.localstatus) do
+ self.localstatus[k] = nil
+ end
 	end,
 
 	["SetTitle"] = function(self, title)
-		self.titletext:SetText(title)
-		self.dropdown.frame:ClearAllPoints()
-		if title and title ~= "" then
-			self.dropdown.frame:SetPoint("TOPRIGHT", -2, 0)
-		else
-			self.dropdown.frame:SetPoint("TOPLEFT", -1, 0)
-		end
+ self.titletext:SetText(title)
+ self.dropdown.frame:ClearAllPoints()
+ if title and title ~= "" then
+ self.dropdown.frame:SetPoint("TOPRIGHT", -2, 0)
+ else
+ self.dropdown.frame:SetPoint("TOPLEFT", -1, 0)
+ end
 	end,
 
 	["SetGroupList"] = function(self,list,order)
-		self.dropdown:SetList(list,order)
+ self.dropdown:SetList(list,order)
 	end,
 
 	["SetStatusTable"] = function(self, status)
-		assert(type(status) == "table")
-		self.status = status
+ assert(type(status) == "table")
+ self.status = status
 	end,
 
 	["SetGroup"] = function(self,group)
-		self.dropdown:SetValue(group)
-		local status = self.status or self.localstatus
-		status.selected = group
-		self:Fire("OnGroupSelected", group)
+ self.dropdown:SetValue(group)
+ local status = self.status or self.localstatus
+ status.selected = group
+ self:Fire("OnGroupSelected", group)
 	end,
 
 	["OnWidthSet"] = function(self, width)
-		local content = self.content
-		local contentwidth = width - 26
-		if contentwidth < 0 then
-			contentwidth = 0
-		end
-		content:SetWidth(contentwidth)
-		content.width = contentwidth
+ local content = self.content
+ local contentwidth = width - 26
+ if contentwidth < 0 then
+ contentwidth = 0
+ end
+ content:SetWidth(contentwidth)
+ content.width = contentwidth
 	end,
 
 	["OnHeightSet"] = function(self, height)
-		local content = self.content
-		local contentheight = height - 63
-		if contentheight < 0 then
-			contentheight = 0
-		end
-		content:SetHeight(contentheight)
-		content.height = contentheight
+ local content = self.content
+ local contentheight = height - 63
+ if contentheight < 0 then
+ contentheight = 0
+ end
+ content:SetHeight(contentheight)
+ content.height = contentheight
 	end,
 
 	["LayoutFinished"] = function(self, width, height)
-		self:SetHeight((height or 0) + 63)
+ self:SetHeight((height or 0) + 63)
 	end,
 
 	["SetDropdownWidth"] = function(self, width)
-		self.dropdown:SetWidth(width)
+ self.dropdown:SetWidth(width)
 	end
 }
 
 --[[-----------------------------------------------------------------------------
 Constructor
 -------------------------------------------------------------------------------]]
-local PaneBackdrop  = {
+local PaneBackdrop = {
 	bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 	tile = true, tileSize = 16, edgeSize = 16,
@@ -138,16 +138,16 @@ local function Constructor()
 	content:SetPoint("BOTTOMRIGHT", -10, 10)
 
 	local widget = {
-		frame       = frame,
-		localstatus = {},
-		titletext   = titletext,
-		dropdown    = dropdown,
-		border      = border,
-		content     = content,
-		type        = Type
+ frame = frame,
+ localstatus = {},
+ titletext = titletext,
+ dropdown = dropdown,
+ border = border,
+ content = content,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 	dropdown.parentgroup = widget
 

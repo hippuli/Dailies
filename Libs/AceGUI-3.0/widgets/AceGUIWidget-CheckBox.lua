@@ -19,11 +19,11 @@ local function AlignImage(self)
 	local img = self.image:GetTexture()
 	self.text:ClearAllPoints()
 	if not img then
-		self.text:SetPoint("LEFT", self.checkbg, "RIGHT")
-		self.text:SetPoint("RIGHT")
+ self.text:SetPoint("LEFT", self.checkbg, "RIGHT")
+ self.text:SetPoint("RIGHT")
 	else
-		self.text:SetPoint("LEFT", self.image, "RIGHT", 1, 0)
-		self.text:SetPoint("RIGHT")
+ self.text:SetPoint("LEFT", self.image, "RIGHT", 1, 0)
+ self.text:SetPoint("RIGHT")
 	end
 end
 
@@ -41,11 +41,11 @@ end
 local function CheckBox_OnMouseDown(frame)
 	local self = frame.obj
 	if not self.disabled then
-		if self.image:GetTexture() then
-			self.text:SetPoint("LEFT", self.image,"RIGHT", 2, -1)
-		else
-			self.text:SetPoint("LEFT", self.checkbg, "RIGHT", 1, -1)
-		end
+ if self.image:GetTexture() then
+ self.text:SetPoint("LEFT", self.image,"RIGHT", 2, -1)
+ else
+ self.text:SetPoint("LEFT", self.checkbg, "RIGHT", 1, -1)
+ end
 	end
 	AceGUI:ClearFocus()
 end
@@ -53,16 +53,16 @@ end
 local function CheckBox_OnMouseUp(frame)
 	local self = frame.obj
 	if not self.disabled then
-		self:ToggleChecked()
+ self:ToggleChecked()
 
-		if self.checked then
-			PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
-		else -- for both nil and false (tristate)
-			PlaySound(857) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
-		end
+ if self.checked then
+ PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
+ else -- for both nil and false (tristate)
+ PlaySound(857) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
+ end
 
-		self:Fire("OnValueChanged", self.checked)
-		AlignImage(self)
+ self:Fire("OnValueChanged", self.checked)
+ AlignImage(self)
 	end
 end
 
@@ -71,166 +71,166 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetType()
-		self:SetValue(false)
-		self:SetTriState(nil)
-		-- height is calculated from the width and required space for the description
-		self:SetWidth(200)
-		self:SetImage()
-		self:SetDisabled(nil)
-		self:SetDescription(nil)
+ self:SetType()
+ self:SetValue(false)
+ self:SetTriState(nil)
+ -- height is calculated from the width and required space for the description
+ self:SetWidth(200)
+ self:SetImage()
+ self:SetDisabled(nil)
+ self:SetDescription(nil)
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["OnWidthSet"] = function(self, width)
-		if self.desc then
-			self.desc:SetWidth(width - 30)
-			if self.desc:GetText() and self.desc:GetText() ~= "" then
-				self:SetHeight(28 + self.desc:GetStringHeight())
-			end
-		end
+ if self.desc then
+ self.desc:SetWidth(width - 30)
+ if self.desc:GetText() and self.desc:GetText() ~= "" then
+ self:SetHeight(28 + self.desc:GetStringHeight())
+ end
+ end
 	end,
 
 	["SetDisabled"] = function(self, disabled)
-		self.disabled = disabled
-		if disabled then
-			self.frame:Disable()
-			self.text:SetTextColor(0.5, 0.5, 0.5)
-			SetDesaturation(self.check, true)
-			if self.desc then
-				self.desc:SetTextColor(0.5, 0.5, 0.5)
-			end
-		else
-			self.frame:Enable()
-			self.text:SetTextColor(1, 1, 1)
-			if self.tristate and self.checked == nil then
-				SetDesaturation(self.check, true)
-			else
-				SetDesaturation(self.check, false)
-			end
-			if self.desc then
-				self.desc:SetTextColor(1, 1, 1)
-			end
-		end
+ self.disabled = disabled
+ if disabled then
+ self.frame:Disable()
+ self.text:SetTextColor(0.5, 0.5, 0.5)
+ SetDesaturation(self.check, true)
+ if self.desc then
+ self.desc:SetTextColor(0.5, 0.5, 0.5)
+ end
+ else
+ self.frame:Enable()
+ self.text:SetTextColor(1, 1, 1)
+ if self.tristate and self.checked == nil then
+ SetDesaturation(self.check, true)
+ else
+ SetDesaturation(self.check, false)
+ end
+ if self.desc then
+ self.desc:SetTextColor(1, 1, 1)
+ end
+ end
 	end,
 
 	["SetValue"] = function(self, value)
-		local check = self.check
-		self.checked = value
-		if value then
-			SetDesaturation(check, false)
-			check:Show()
-		else
-			--Nil is the unknown tristate value
-			if self.tristate and value == nil then
-				SetDesaturation(check, true)
-				check:Show()
-			else
-				SetDesaturation(check, false)
-				check:Hide()
-			end
-		end
-		self:SetDisabled(self.disabled)
+ local check = self.check
+ self.checked = value
+ if value then
+ SetDesaturation(check, false)
+ check:Show()
+ else
+ --Nil is the unknown tristate value
+ if self.tristate and value == nil then
+ SetDesaturation(check, true)
+ check:Show()
+ else
+ SetDesaturation(check, false)
+ check:Hide()
+ end
+ end
+ self:SetDisabled(self.disabled)
 	end,
 
 	["GetValue"] = function(self)
-		return self.checked
+ return self.checked
 	end,
 
 	["SetTriState"] = function(self, enabled)
-		self.tristate = enabled
-		self:SetValue(self:GetValue())
+ self.tristate = enabled
+ self:SetValue(self:GetValue())
 	end,
 
 	["SetType"] = function(self, type)
-		local checkbg = self.checkbg
-		local check = self.check
-		local highlight = self.highlight
+ local checkbg = self.checkbg
+ local check = self.check
+ local highlight = self.highlight
 
-		local size
-		if type == "radio" then
-			size = 16
-			checkbg:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
-			checkbg:SetTexCoord(0, 0.25, 0, 1)
-			check:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
-			check:SetTexCoord(0.25, 0.5, 0, 1)
-			check:SetBlendMode("ADD")
-			highlight:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
-			highlight:SetTexCoord(0.5, 0.75, 0, 1)
-		else
-			size = 24
-			checkbg:SetTexture(130755) -- Interface\\Buttons\\UI-CheckBox-Up
-			checkbg:SetTexCoord(0, 1, 0, 1)
-			check:SetTexture(130751) -- Interface\\Buttons\\UI-CheckBox-Check
-			check:SetTexCoord(0, 1, 0, 1)
-			check:SetBlendMode("BLEND")
-			highlight:SetTexture(130753) -- Interface\\Buttons\\UI-CheckBox-Highlight
-			highlight:SetTexCoord(0, 1, 0, 1)
-		end
-		checkbg:SetHeight(size)
-		checkbg:SetWidth(size)
+ local size
+ if type == "radio" then
+ size = 16
+ checkbg:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
+ checkbg:SetTexCoord(0, 0.25, 0, 1)
+ check:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
+ check:SetTexCoord(0.25, 0.5, 0, 1)
+ check:SetBlendMode("ADD")
+ highlight:SetTexture(130843) -- Interface\\Buttons\\UI-RadioButton
+ highlight:SetTexCoord(0.5, 0.75, 0, 1)
+ else
+ size = 24
+ checkbg:SetTexture(130755) -- Interface\\Buttons\\UI-CheckBox-Up
+ checkbg:SetTexCoord(0, 1, 0, 1)
+ check:SetTexture(130751) -- Interface\\Buttons\\UI-CheckBox-Check
+ check:SetTexCoord(0, 1, 0, 1)
+ check:SetBlendMode("BLEND")
+ highlight:SetTexture(130753) -- Interface\\Buttons\\UI-CheckBox-Highlight
+ highlight:SetTexCoord(0, 1, 0, 1)
+ end
+ checkbg:SetHeight(size)
+ checkbg:SetWidth(size)
 	end,
 
 	["ToggleChecked"] = function(self)
-		local value = self:GetValue()
-		if self.tristate then
-			--cycle in true, nil, false order
-			if value then
-				self:SetValue(nil)
-			elseif value == nil then
-				self:SetValue(false)
-			else
-				self:SetValue(true)
-			end
-		else
-			self:SetValue(not self:GetValue())
-		end
+ local value = self:GetValue()
+ if self.tristate then
+ --cycle in true, nil, false order
+ if value then
+ self:SetValue(nil)
+ elseif value == nil then
+ self:SetValue(false)
+ else
+ self:SetValue(true)
+ end
+ else
+ self:SetValue(not self:GetValue())
+ end
 	end,
 
 	["SetLabel"] = function(self, label)
-		self.text:SetText(label)
+ self.text:SetText(label)
 	end,
 
 	["SetDescription"] = function(self, desc)
-		if desc then
-			if not self.desc then
-				local f = self.frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-				f:ClearAllPoints()
-				f:SetPoint("TOPLEFT", self.checkbg, "TOPRIGHT", 5, -21)
-				f:SetWidth(self.frame.width - 30)
-				f:SetPoint("RIGHT", self.frame, "RIGHT", -30, 0)
-				f:SetJustifyH("LEFT")
-				f:SetJustifyV("TOP")
-				self.desc = f
-			end
-			self.desc:Show()
-			--self.text:SetFontObject(GameFontNormal)
-			self.desc:SetText(desc)
-			self:SetHeight(28 + self.desc:GetStringHeight())
-		else
-			if self.desc then
-				self.desc:SetText("")
-				self.desc:Hide()
-			end
-			--self.text:SetFontObject(GameFontHighlight)
-			self:SetHeight(24)
-		end
+ if desc then
+ if not self.desc then
+ local f = self.frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+ f:ClearAllPoints()
+ f:SetPoint("TOPLEFT", self.checkbg, "TOPRIGHT", 5, -21)
+ f:SetWidth(self.frame.width - 30)
+ f:SetPoint("RIGHT", self.frame, "RIGHT", -30, 0)
+ f:SetJustifyH("LEFT")
+ f:SetJustifyV("TOP")
+ self.desc = f
+ end
+ self.desc:Show()
+ --self.text:SetFontObject(GameFontNormal)
+ self.desc:SetText(desc)
+ self:SetHeight(28 + self.desc:GetStringHeight())
+ else
+ if self.desc then
+ self.desc:SetText("")
+ self.desc:Hide()
+ end
+ --self.text:SetFontObject(GameFontHighlight)
+ self:SetHeight(24)
+ end
 	end,
 
 	["SetImage"] = function(self, path, ...)
-		local image = self.image
-		image:SetTexture(path)
+ local image = self.image
+ image:SetTexture(path)
 
-		if image:GetTexture() then
-			local n = select("#", ...)
-			if n == 4 or n == 8 then
-				image:SetTexCoord(...)
-			else
-				image:SetTexCoord(0, 1, 0, 1)
-			end
-		end
-		AlignImage(self)
+ if image:GetTexture() then
+ local n = select("#", ...)
+ if n == 4 or n == 8 then
+ image:SetTexCoord(...)
+ else
+ image:SetTexCoord(0, 1, 0, 1)
+ end
+ end
+ AlignImage(self)
 	end
 }
 
@@ -274,16 +274,16 @@ local function Constructor()
 	image:SetPoint("LEFT", checkbg, "RIGHT", 1, 0)
 
 	local widget = {
-		checkbg   = checkbg,
-		check     = check,
-		text      = text,
-		highlight = highlight,
-		image     = image,
-		frame     = frame,
-		type      = Type
+ checkbg = checkbg,
+ check = check,
+ text = text,
+ highlight = highlight,
+ image = image,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	return AceGUI:RegisterAsWidget(widget)

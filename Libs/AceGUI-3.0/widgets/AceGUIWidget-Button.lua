@@ -35,37 +35,37 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		-- restore default values
-		self:SetHeight(24)
-		self:SetWidth(200)
-		self:SetDisabled(false)
-		self:SetAutoWidth(false)
-		self:SetText()
+ -- restore default values
+ self:SetHeight(24)
+ self:SetWidth(200)
+ self:SetDisabled(false)
+ self:SetAutoWidth(false)
+ self:SetText()
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetText"] = function(self, text)
-		self.text:SetText(text)
-		if self.autoWidth then
-			self:SetWidth(self.text:GetStringWidth() + 30)
-		end
+ self.text:SetText(text)
+ if self.autoWidth then
+ self:SetWidth(self.text:GetStringWidth() + 30)
+ end
 	end,
 
 	["SetAutoWidth"] = function(self, autoWidth)
-		self.autoWidth = autoWidth
-		if self.autoWidth then
-			self:SetWidth(self.text:GetStringWidth() + 30)
-		end
+ self.autoWidth = autoWidth
+ if self.autoWidth then
+ self:SetWidth(self.text:GetStringWidth() + 30)
+ end
 	end,
 
 	["SetDisabled"] = function(self, disabled)
-		self.disabled = disabled
-		if disabled then
-			self.frame:Disable()
-		else
-			self.frame:Enable()
-		end
+ self.disabled = disabled
+ if disabled then
+ self.frame:Disable()
+ else
+ self.frame:Enable()
+ end
 	end
 }
 
@@ -89,12 +89,12 @@ local function Constructor()
 	text:SetJustifyV("MIDDLE")
 
 	local widget = {
-		text  = text,
-		frame = frame,
-		type  = Type
+ text = text,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	return AceGUI:RegisterAsWidget(widget)

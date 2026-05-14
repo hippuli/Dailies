@@ -36,56 +36,56 @@ local function PanelTemplates_TabResize(tab, padding, absoluteSize, minWidth, ma
 	local width, tabWidth;
 	local textWidth;
 	if ( absoluteTextSize ) then
-		textWidth = absoluteTextSize;
+ textWidth = absoluteTextSize;
 	else
-		tabText:SetWidth(0);
-		textWidth = tabText:GetWidth();
+ tabText:SetWidth(0);
+ textWidth = tabText:GetWidth();
 	end
 	-- If there's an absolute size specified then use it
 	if ( absoluteSize ) then
-		if ( absoluteSize < sideWidths) then
-			width = 1;
-			tabWidth = sideWidths
-		else
-			width = absoluteSize - sideWidths;
-			tabWidth = absoluteSize
-		end
-		tabText:SetWidth(width);
+ if ( absoluteSize < sideWidths) then
+ width = 1;
+ tabWidth = sideWidths
+ else
+ width = absoluteSize - sideWidths;
+ tabWidth = absoluteSize
+ end
+ tabText:SetWidth(width);
 	else
-		-- Otherwise try to use padding
-		if ( padding ) then
-			width = textWidth + padding;
-		else
-			width = textWidth + 24;
-		end
-		-- If greater than the maxWidth then cap it
-		if ( maxWidth and width > maxWidth ) then
-			if ( padding ) then
-				width = maxWidth + padding;
-			else
-				width = maxWidth + 24;
-			end
-			tabText:SetWidth(width);
-		else
-			tabText:SetWidth(0);
-		end
-		if (minWidth and width < minWidth) then
-			width = minWidth;
-		end
-		tabWidth = width + sideWidths;
+ -- Otherwise try to use padding
+ if ( padding ) then
+ width = textWidth + padding;
+ else
+ width = textWidth + 24;
+ end
+ -- If greater than the maxWidth then cap it
+ if ( maxWidth and width > maxWidth ) then
+ if ( padding ) then
+ width = maxWidth + padding;
+ else
+ width = maxWidth + 24;
+ end
+ tabText:SetWidth(width);
+ else
+ tabText:SetWidth(0);
+ end
+ if (minWidth and width < minWidth) then
+ width = minWidth;
+ end
+ tabWidth = width + sideWidths;
 	end
 
 	if ( buttonMiddle ) then
-		buttonMiddle:SetWidth(width);
+ buttonMiddle:SetWidth(width);
 	end
 	if ( buttonMiddleDisabled ) then
-		buttonMiddleDisabled:SetWidth(width);
+ buttonMiddleDisabled:SetWidth(width);
 	end
 
 	tab:SetWidth(tabWidth);
 
 	if ( highlightTexture ) then
-		highlightTexture:SetWidth(tabWidth);
+ highlightTexture:SetWidth(tabWidth);
 	end
 end
 
@@ -134,7 +134,7 @@ local function PanelTemplates_SelectTab(tab)
 	rightDisabled:Show();
 
 	if GameTooltip:IsOwned(tab) then
-		GameTooltip:Hide();
+ GameTooltip:Hide();
 	end
 end
 
@@ -161,11 +161,11 @@ end
 
 local function UpdateTabLook(frame)
 	if frame.disabled then
-		PanelTemplates_SetDisabledTabState(frame)
+ PanelTemplates_SetDisabledTabState(frame)
 	elseif frame.selected then
-		PanelTemplates_SelectTab(frame)
+ PanelTemplates_SelectTab(frame)
 	else
-		PanelTemplates_DeselectTab(frame)
+ PanelTemplates_DeselectTab(frame)
 	end
 end
 
@@ -196,8 +196,8 @@ Scripts
 -------------------------------------------------------------------------------]]
 local function Tab_OnClick(frame)
 	if not (frame.selected or frame.disabled) then
-		PlaySound(841) -- SOUNDKIT.IG_CHARACTER_INFO_TAB
-		frame.obj:SelectTab(frame.value)
+ PlaySound(841) -- SOUNDKIT.IG_CHARACTER_INFO_TAB
+ frame.obj:SelectTab(frame.value)
 	end
 end
 
@@ -220,268 +220,268 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetTitle()
+ self:SetTitle()
 	end,
 
 	["OnRelease"] = function(self)
-		self.status = nil
-		for k in pairs(self.localstatus) do
-			self.localstatus[k] = nil
-		end
-		self.tablist = nil
-		for _, tab in pairs(self.tabs) do
-			tab:Hide()
-		end
+ self.status = nil
+ for k in pairs(self.localstatus) do
+ self.localstatus[k] = nil
+ end
+ self.tablist = nil
+ for _, tab in pairs(self.tabs) do
+ tab:Hide()
+ end
 	end,
 
 	["CreateTab"] = function(self, id)
-		local tabname = ("AceGUITabGroup%dTab%d"):format(self.num, id)
-		local tab = CreateFrame("Button", tabname, self.border)
-		tab:SetSize(115, 24)
-		tab.deselectedTextY = -3
-		tab.selectedTextY = -2
+ local tabname = ("AceGUITabGroup%dTab%d"):format(self.num, id)
+ local tab = CreateFrame("Button", tabname, self.border)
+ tab:SetSize(115, 24)
+ tab.deselectedTextY = -3
+ tab.selectedTextY = -2
 
-		tab.LeftDisabled = tab:CreateTexture(tabname .. "LeftDisabled", "BORDER")
-		tab.LeftDisabled:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-ActiveTab")
-		tab.LeftDisabled:SetSize(20, 24)
-		tab.LeftDisabled:SetPoint("BOTTOMLEFT", 0, -3)
-		tab.LeftDisabled:SetTexCoord(0, 0.15625, 0, 1.0)
+ tab.LeftDisabled = tab:CreateTexture(tabname .. "LeftDisabled", "BORDER")
+ tab.LeftDisabled:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-ActiveTab")
+ tab.LeftDisabled:SetSize(20, 24)
+ tab.LeftDisabled:SetPoint("BOTTOMLEFT", 0, -3)
+ tab.LeftDisabled:SetTexCoord(0, 0.15625, 0, 1.0)
 
-		tab.MiddleDisabled = tab:CreateTexture(tabname .. "MiddleDisabled", "BORDER")
-		tab.MiddleDisabled:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-ActiveTab")
-		tab.MiddleDisabled:SetSize(88, 24)
-		tab.MiddleDisabled:SetPoint("LEFT", tab.LeftDisabled, "RIGHT")
-		tab.MiddleDisabled:SetTexCoord(0.15625, 0.84375, 0, 1.0)
+ tab.MiddleDisabled = tab:CreateTexture(tabname .. "MiddleDisabled", "BORDER")
+ tab.MiddleDisabled:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-ActiveTab")
+ tab.MiddleDisabled:SetSize(88, 24)
+ tab.MiddleDisabled:SetPoint("LEFT", tab.LeftDisabled, "RIGHT")
+ tab.MiddleDisabled:SetTexCoord(0.15625, 0.84375, 0, 1.0)
 
-		tab.RightDisabled = tab:CreateTexture(tabname .. "RightDisabled", "BORDER")
-		tab.RightDisabled:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-ActiveTab")
-		tab.RightDisabled:SetSize(20, 24)
-		tab.RightDisabled:SetPoint("LEFT", tab.MiddleDisabled, "RIGHT")
-		tab.RightDisabled:SetTexCoord(0.84375, 1.0, 0, 1.0)
+ tab.RightDisabled = tab:CreateTexture(tabname .. "RightDisabled", "BORDER")
+ tab.RightDisabled:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-ActiveTab")
+ tab.RightDisabled:SetSize(20, 24)
+ tab.RightDisabled:SetPoint("LEFT", tab.MiddleDisabled, "RIGHT")
+ tab.RightDisabled:SetTexCoord(0.84375, 1.0, 0, 1.0)
 
-		tab.Left = tab:CreateTexture(tabname .. "Left", "BORDER")
-		tab.Left:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-InActiveTab")
-		tab.Left:SetSize(20, 24)
-		tab.Left:SetPoint("TOPLEFT")
-		tab.Left:SetTexCoord(0, 0.15625, 0, 1.0)
+ tab.Left = tab:CreateTexture(tabname .. "Left", "BORDER")
+ tab.Left:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-InActiveTab")
+ tab.Left:SetSize(20, 24)
+ tab.Left:SetPoint("TOPLEFT")
+ tab.Left:SetTexCoord(0, 0.15625, 0, 1.0)
 
-		tab.Middle = tab:CreateTexture(tabname .. "Middle", "BORDER")
-		tab.Middle:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-InActiveTab")
-		tab.Middle:SetSize(88, 24)
-		tab.Middle:SetPoint("LEFT", tab.Left, "RIGHT")
-		tab.Middle:SetTexCoord(0.15625, 0.84375, 0, 1.0)
+ tab.Middle = tab:CreateTexture(tabname .. "Middle", "BORDER")
+ tab.Middle:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-InActiveTab")
+ tab.Middle:SetSize(88, 24)
+ tab.Middle:SetPoint("LEFT", tab.Left, "RIGHT")
+ tab.Middle:SetTexCoord(0.15625, 0.84375, 0, 1.0)
 
-		tab.Right = tab:CreateTexture(tabname .. "Right", "BORDER")
-		tab.Right:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-InActiveTab")
-		tab.Right:SetSize(20, 24)
-		tab.Right:SetPoint("LEFT", tab.Middle, "RIGHT")
-		tab.Right:SetTexCoord(0.84375, 1.0, 0, 1.0)
+ tab.Right = tab:CreateTexture(tabname .. "Right", "BORDER")
+ tab.Right:SetTexture("Interface\\OptionsFrame\\UI-OptionsFrame-InActiveTab")
+ tab.Right:SetSize(20, 24)
+ tab.Right:SetPoint("LEFT", tab.Middle, "RIGHT")
+ tab.Right:SetTexCoord(0.84375, 1.0, 0, 1.0)
 
-		tab.Text = tab:CreateFontString(tabname .. "Text")
-		tab:SetFontString(tab.Text)
+ tab.Text = tab:CreateFontString(tabname .. "Text")
+ tab:SetFontString(tab.Text)
 
-		tab:SetNormalFontObject(GameFontNormalSmall)
-		tab:SetHighlightFontObject(GameFontHighlightSmall)
-		tab:SetDisabledFontObject(GameFontHighlightSmall)
-		tab:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight", "ADD")
-		tab.HighlightTexture = tab:GetHighlightTexture()
-		tab.HighlightTexture:ClearAllPoints()
-		tab.HighlightTexture:SetPoint("LEFT", tab, "LEFT", 10, -4)
-		tab.HighlightTexture:SetPoint("RIGHT", tab, "RIGHT", -10, -4)
-		_G[tabname .. "HighlightTexture"] = tab.HighlightTexture
+ tab:SetNormalFontObject(GameFontNormalSmall)
+ tab:SetHighlightFontObject(GameFontHighlightSmall)
+ tab:SetDisabledFontObject(GameFontHighlightSmall)
+ tab:SetHighlightTexture("Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight", "ADD")
+ tab.HighlightTexture = tab:GetHighlightTexture()
+ tab.HighlightTexture:ClearAllPoints()
+ tab.HighlightTexture:SetPoint("LEFT", tab, "LEFT", 10, -4)
+ tab.HighlightTexture:SetPoint("RIGHT", tab, "RIGHT", -10, -4)
+ _G[tabname .. "HighlightTexture"] = tab.HighlightTexture
 
-		tab.obj = self
-		tab.id = id
+ tab.obj = self
+ tab.id = id
 
-		tab.text = tab.Text -- compat
-		tab.text:ClearAllPoints()
-		tab.text:SetPoint("LEFT", 14, -3)
-		tab.text:SetPoint("RIGHT", -12, -3)
+ tab.text = tab.Text -- compat
+ tab.text:ClearAllPoints()
+ tab.text:SetPoint("LEFT", 14, -3)
+ tab.text:SetPoint("RIGHT", -12, -3)
 
-		tab:SetScript("OnClick", Tab_OnClick)
-		tab:SetScript("OnEnter", Tab_OnEnter)
-		tab:SetScript("OnLeave", Tab_OnLeave)
-		tab:SetScript("OnShow", Tab_OnShow)
+ tab:SetScript("OnClick", Tab_OnClick)
+ tab:SetScript("OnEnter", Tab_OnEnter)
+ tab:SetScript("OnLeave", Tab_OnLeave)
+ tab:SetScript("OnShow", Tab_OnShow)
 
-		tab._SetText = tab.SetText
-		tab.SetText = Tab_SetText
-		tab.SetSelected = Tab_SetSelected
-		tab.SetDisabled = Tab_SetDisabled
+ tab._SetText = tab.SetText
+ tab.SetText = Tab_SetText
+ tab.SetSelected = Tab_SetSelected
+ tab.SetDisabled = Tab_SetDisabled
 
-		return tab
+ return tab
 	end,
 
 	["SetTitle"] = function(self, text)
-		self.titletext:SetText(text or "")
-		if text and text ~= "" then
-			self.alignoffset = 25
-		else
-			self.alignoffset = 18
-		end
-		self:BuildTabs()
+ self.titletext:SetText(text or "")
+ if text and text ~= "" then
+ self.alignoffset = 25
+ else
+ self.alignoffset = 18
+ end
+ self:BuildTabs()
 	end,
 
 	["SetStatusTable"] = function(self, status)
-		assert(type(status) == "table")
-		self.status = status
+ assert(type(status) == "table")
+ self.status = status
 	end,
 
 	["SelectTab"] = function(self, value)
-		local status = self.status or self.localstatus
-		local found
-		for i, v in ipairs(self.tabs) do
-			if v.value == value then
-				v:SetSelected(true)
-				found = true
-			else
-				v:SetSelected(false)
-			end
-		end
-		status.selected = value
-		if found then
-			self:Fire("OnGroupSelected",value)
-		end
+ local status = self.status or self.localstatus
+ local found
+ for i, v in ipairs(self.tabs) do
+ if v.value == value then
+ v:SetSelected(true)
+ found = true
+ else
+ v:SetSelected(false)
+ end
+ end
+ status.selected = value
+ if found then
+ self:Fire("OnGroupSelected",value)
+ end
 	end,
 
 	["SetTabs"] = function(self, tabs)
-		self.tablist = tabs
-		self:BuildTabs()
+ self.tablist = tabs
+ self:BuildTabs()
 	end,
 
 
 	["BuildTabs"] = function(self)
-		local hastitle = (self.titletext:GetText() and self.titletext:GetText() ~= "")
-		local tablist = self.tablist
-		local tabs = self.tabs
+ local hastitle = (self.titletext:GetText() and self.titletext:GetText() ~= "")
+ local tablist = self.tablist
+ local tabs = self.tabs
 
-		if not tablist then return end
+ if not tablist then return end
 
-		local width = self.frame.width or self.frame:GetWidth() or 0
+ local width = self.frame.width or self.frame:GetWidth() or 0
 
-		wipe(widths)
-		wipe(rowwidths)
-		wipe(rowends)
+ wipe(widths)
+ wipe(rowwidths)
+ wipe(rowends)
 
-		--Place Text into tabs and get thier initial width
-		for i, v in ipairs(tablist) do
-			local tab = tabs[i]
-			if not tab then
-				tab = self:CreateTab(i)
-				tabs[i] = tab
-			end
+ --Place Text into tabs and get thier initial width
+ for i, v in ipairs(tablist) do
+ local tab = tabs[i]
+ if not tab then
+ tab = self:CreateTab(i)
+ tabs[i] = tab
+ end
 
-			tab:Show()
-			tab:SetText(v.text)
-			tab:SetDisabled(v.disabled)
-			tab.value = v.value
+ tab:Show()
+ tab:SetText(v.text)
+ tab:SetDisabled(v.disabled)
+ tab.value = v.value
 
-			widths[i] = tab:GetWidth() - 6 --tabs are anchored 10 pixels from the right side of the previous one to reduce spacing, but add a fixed 4px padding for the text
-		end
+ widths[i] = tab:GetWidth() - 6 --tabs are anchored 10 pixels from the right side of the previous one to reduce spacing, but add a fixed 4px padding for the text
+ end
 
-		for i = (#tablist)+1, #tabs, 1 do
-			tabs[i]:Hide()
-		end
+ for i = (#tablist)+1, #tabs, 1 do
+ tabs[i]:Hide()
+ end
 
-		--First pass, find the minimum number of rows needed to hold all tabs and the initial tab layout
-		local numtabs = #tablist
-		local numrows = 1
-		local usedwidth = 0
+ --First pass, find the minimum number of rows needed to hold all tabs and the initial tab layout
+ local numtabs = #tablist
+ local numrows = 1
+ local usedwidth = 0
 
-		for i = 1, #tablist do
-			--If this is not the first tab of a row and there isn't room for it
-			if usedwidth ~= 0 and (width - usedwidth - widths[i]) < 0 then
-				rowwidths[numrows] = usedwidth + 10 --first tab in each row takes up an extra 10px
-				rowends[numrows] = i - 1
-				numrows = numrows + 1
-				usedwidth = 0
-			end
-			usedwidth = usedwidth + widths[i]
-		end
-		rowwidths[numrows] = usedwidth + 10 --first tab in each row takes up an extra 10px
-		rowends[numrows] = #tablist
+ for i = 1, #tablist do
+ --If this is not the first tab of a row and there isn't room for it
+ if usedwidth ~= 0 and (width - usedwidth - widths[i]) < 0 then
+ rowwidths[numrows] = usedwidth + 10 --first tab in each row takes up an extra 10px
+ rowends[numrows] = i - 1
+ numrows = numrows + 1
+ usedwidth = 0
+ end
+ usedwidth = usedwidth + widths[i]
+ end
+ rowwidths[numrows] = usedwidth + 10 --first tab in each row takes up an extra 10px
+ rowends[numrows] = #tablist
 
-		--Fix for single tabs being left on the last row, move a tab from the row above if applicable
-		if numrows > 1 then
-			--if the last row has only one tab
-			if rowends[numrows-1] == numtabs-1 then
-				--if there are more than 2 tabs in the 2nd last row
-				if (numrows == 2 and rowends[numrows-1] > 2) or (rowends[numrows] - rowends[numrows-1] > 2) then
-					--move 1 tab from the second last row to the last, if there is enough space
-					if (rowwidths[numrows] + widths[numtabs-1]) <= width then
-						rowends[numrows-1] = rowends[numrows-1] - 1
-						rowwidths[numrows] = rowwidths[numrows] + widths[numtabs-1]
-						rowwidths[numrows-1] = rowwidths[numrows-1] - widths[numtabs-1]
-					end
-				end
-			end
-		end
+ --Fix for single tabs being left on the last row, move a tab from the row above if applicable
+ if numrows > 1 then
+ --if the last row has only one tab
+ if rowends[numrows-1] == numtabs-1 then
+ --if there are more than 2 tabs in the 2nd last row
+ if (numrows == 2 and rowends[numrows-1] > 2) or (rowends[numrows] - rowends[numrows-1] > 2) then
+ --move 1 tab from the second last row to the last, if there is enough space
+ if (rowwidths[numrows] + widths[numtabs-1]) <= width then
+ rowends[numrows-1] = rowends[numrows-1] - 1
+ rowwidths[numrows] = rowwidths[numrows] + widths[numtabs-1]
+ rowwidths[numrows-1] = rowwidths[numrows-1] - widths[numtabs-1]
+ end
+ end
+ end
+ end
 
-		--anchor the rows as defined and resize tabs to fill thier row
-		local starttab = 1
-		for row, endtab in ipairs(rowends) do
-			local first = true
-			for tabno = starttab, endtab do
-				local tab = tabs[tabno]
-				tab:ClearAllPoints()
-				if first then
-					tab:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -(hastitle and 14 or 7)-(row-1)*20 )
-					first = false
-				else
-					tab:SetPoint("LEFT", tabs[tabno-1], "RIGHT", -10, 0)
-				end
-			end
+ --anchor the rows as defined and resize tabs to fill thier row
+ local starttab = 1
+ for row, endtab in ipairs(rowends) do
+ local first = true
+ for tabno = starttab, endtab do
+ local tab = tabs[tabno]
+ tab:ClearAllPoints()
+ if first then
+ tab:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -(hastitle and 14 or 7)-(row-1)*20 )
+ first = false
+ else
+ tab:SetPoint("LEFT", tabs[tabno-1], "RIGHT", -10, 0)
+ end
+ end
 
-			-- equal padding for each tab to fill the available width,
-			-- if the used space is above 75% already
-			-- the 18 pixel is the typical width of a scrollbar, so we can have a tab group inside a scrolling frame,
-			-- and not have the tabs jump around funny when switching between tabs that need scrolling and those that don't
-			local padding = 0
-			if not (numrows == 1 and rowwidths[1] < width*0.75 - 18) then
-				padding = (width - rowwidths[row]) / (endtab - starttab+1)
-			end
+ -- equal padding for each tab to fill the available width,
+ -- if the used space is above 75% already
+ -- the 18 pixel is the typical width of a scrollbar, so we can have a tab group inside a scrolling frame,
+ -- and not have the tabs jump around funny when switching between tabs that need scrolling and those that don't
+ local padding = 0
+ if not (numrows == 1 and rowwidths[1] < width*0.75 - 18) then
+ padding = (width - rowwidths[row]) / (endtab - starttab+1)
+ end
 
-			for i = starttab, endtab do
-				PanelTemplates_TabResize(tabs[i], padding + 4, nil, nil, width, tabs[i]:GetFontString():GetStringWidth())
-			end
-			starttab = endtab + 1
-		end
+ for i = starttab, endtab do
+ PanelTemplates_TabResize(tabs[i], padding + 4, nil, nil, width, tabs[i]:GetFontString():GetStringWidth())
+ end
+ starttab = endtab + 1
+ end
 
-		self.borderoffset = (hastitle and 17 or 10)+((numrows)*20)
-		self.border:SetPoint("TOPLEFT", 1, -self.borderoffset)
+ self.borderoffset = (hastitle and 17 or 10)+((numrows)*20)
+ self.border:SetPoint("TOPLEFT", 1, -self.borderoffset)
 	end,
 
 	["OnWidthSet"] = function(self, width)
-		local content = self.content
-		local contentwidth = width - 60
-		if contentwidth < 0 then
-			contentwidth = 0
-		end
-		content:SetWidth(contentwidth)
-		content.width = contentwidth
-		self:BuildTabs(self)
-		self.frame:SetScript("OnUpdate", BuildTabsOnUpdate)
+ local content = self.content
+ local contentwidth = width - 60
+ if contentwidth < 0 then
+ contentwidth = 0
+ end
+ content:SetWidth(contentwidth)
+ content.width = contentwidth
+ self:BuildTabs(self)
+ self.frame:SetScript("OnUpdate", BuildTabsOnUpdate)
 	end,
 
 	["OnHeightSet"] = function(self, height)
-		local content = self.content
-		local contentheight = height - (self.borderoffset + 23)
-		if contentheight < 0 then
-			contentheight = 0
-		end
-		content:SetHeight(contentheight)
-		content.height = contentheight
+ local content = self.content
+ local contentheight = height - (self.borderoffset + 23)
+ if contentheight < 0 then
+ contentheight = 0
+ end
+ content:SetHeight(contentheight)
+ content.height = contentheight
 	end,
 
 	["LayoutFinished"] = function(self, width, height)
-		if self.noAutoHeight then return end
-		self:SetHeight((height or 0) + (self.borderoffset + 23))
+ if self.noAutoHeight then return end
+ self:SetHeight((height or 0) + (self.borderoffset + 23))
 	end
 }
 
 --[[-----------------------------------------------------------------------------
 Constructor
 -------------------------------------------------------------------------------]]
-local PaneBackdrop  = {
+local PaneBackdrop = {
 	bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 	tile = true, tileSize = 16, edgeSize = 16,
@@ -514,19 +514,19 @@ local function Constructor()
 	content:SetPoint("BOTTOMRIGHT", -10, 7)
 
 	local widget = {
-		num          = num,
-		frame        = frame,
-		localstatus  = {},
-		alignoffset  = 18,
-		titletext    = titletext,
-		border       = border,
-		borderoffset = 27,
-		tabs         = {},
-		content      = content,
-		type         = Type
+ num = num,
+ frame = frame,
+ localstatus = {},
+ alignoffset = 18,
+ titletext = titletext,
+ border = border,
+ borderoffset = 27,
+ tabs = {},
+ content = content,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	return AceGUI:RegisterAsContainer(widget)

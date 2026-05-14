@@ -77,84 +77,84 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self.frame:SetParent(UIParent)
-		self.frame:SetFrameStrata("FULLSCREEN_DIALOG")
-		self.frame:SetFrameLevel(100) -- Lots of room to draw under it
-		self:SetTitle()
-		self:SetStatusText()
-		self:ApplyStatus()
-		self:Show()
-        self:EnableResize(true)
+ self.frame:SetParent(UIParent)
+ self.frame:SetFrameStrata("FULLSCREEN_DIALOG")
+ self.frame:SetFrameLevel(100) -- Lots of room to draw under it
+ self:SetTitle()
+ self:SetStatusText()
+ self:ApplyStatus()
+ self:Show()
+ self:EnableResize(true)
 	end,
 
 	["OnRelease"] = function(self)
-		self.status = nil
-		wipe(self.localstatus)
+ self.status = nil
+ wipe(self.localstatus)
 	end,
 
 	["OnWidthSet"] = function(self, width)
-		local content = self.content
-		local contentwidth = width - 34
-		if contentwidth < 0 then
-			contentwidth = 0
-		end
-		content:SetWidth(contentwidth)
-		content.width = contentwidth
+ local content = self.content
+ local contentwidth = width - 34
+ if contentwidth < 0 then
+ contentwidth = 0
+ end
+ content:SetWidth(contentwidth)
+ content.width = contentwidth
 	end,
 
 	["OnHeightSet"] = function(self, height)
-		local content = self.content
-		local contentheight = height - 57
-		if contentheight < 0 then
-			contentheight = 0
-		end
-		content:SetHeight(contentheight)
-		content.height = contentheight
+ local content = self.content
+ local contentheight = height - 57
+ if contentheight < 0 then
+ contentheight = 0
+ end
+ content:SetHeight(contentheight)
+ content.height = contentheight
 	end,
 
 	["SetTitle"] = function(self, title)
-		self.titletext:SetText(title)
-		self.titlebg:SetWidth((self.titletext:GetWidth() or 0) + 10)
+ self.titletext:SetText(title)
+ self.titlebg:SetWidth((self.titletext:GetWidth() or 0) + 10)
 	end,
 
 	["SetStatusText"] = function(self, text)
-		self.statustext:SetText(text)
+ self.statustext:SetText(text)
 	end,
 
 	["Hide"] = function(self)
-		self.frame:Hide()
+ self.frame:Hide()
 	end,
 
 	["Show"] = function(self)
-		self.frame:Show()
+ self.frame:Show()
 	end,
 
 	["EnableResize"] = function(self, state)
-		local func = state and "Show" or "Hide"
-		self.sizer_se[func](self.sizer_se)
-		self.sizer_s[func](self.sizer_s)
-		self.sizer_e[func](self.sizer_e)
+ local func = state and "Show" or "Hide"
+ self.sizer_se[func](self.sizer_se)
+ self.sizer_s[func](self.sizer_s)
+ self.sizer_e[func](self.sizer_e)
 	end,
 
 	-- called to set an external table to store status in
 	["SetStatusTable"] = function(self, status)
-		assert(type(status) == "table")
-		self.status = status
-		self:ApplyStatus()
+ assert(type(status) == "table")
+ self.status = status
+ self:ApplyStatus()
 	end,
 
 	["ApplyStatus"] = function(self)
-		local status = self.status or self.localstatus
-		local frame = self.frame
-		self:SetWidth(status.width or 700)
-		self:SetHeight(status.height or 500)
-		frame:ClearAllPoints()
-		if status.top and status.left then
-			frame:SetPoint("TOP", UIParent, "BOTTOM", 0, status.top)
-			frame:SetPoint("LEFT", UIParent, "LEFT", status.left, 0)
-		else
-			frame:SetPoint("CENTER")
-		end
+ local status = self.status or self.localstatus
+ local frame = self.frame
+ self:SetWidth(status.width or 700)
+ self:SetHeight(status.height or 500)
+ frame:ClearAllPoints()
+ if status.top and status.left then
+ frame:SetPoint("TOP", UIParent, "BOTTOM", 0, status.top)
+ frame:SetPoint("LEFT", UIParent, "LEFT", status.left, 0)
+ else
+ frame:SetPoint("CENTER")
+ end
 	end
 }
 
@@ -168,7 +168,7 @@ local FrameBackdrop = {
 	insets = { left = 8, right = 8, top = 8, bottom = 8 }
 }
 
-local PaneBackdrop  = {
+local PaneBackdrop = {
 	bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
 	tile = true, tileSize = 16, edgeSize = 16,
@@ -187,9 +187,9 @@ local function Constructor()
 	frame:SetBackdrop(FrameBackdrop)
 	frame:SetBackdropColor(0, 0, 0, 1)
 	if frame.SetResizeBounds then -- WoW 10.0
-		frame:SetResizeBounds(400, 200)
+ frame:SetResizeBounds(400, 200)
 	else
-		frame:SetMinResize(400, 200)
+ frame:SetMinResize(400, 200)
 	end
 	frame:SetToplevel(true)
 	frame:SetScript("OnShow", Frame_OnShow)
@@ -296,19 +296,19 @@ local function Constructor()
 	content:SetPoint("BOTTOMRIGHT", -17, 40)
 
 	local widget = {
-		localstatus = {},
-		titletext   = titletext,
-		statustext  = statustext,
-		titlebg     = titlebg,
-		sizer_se    = sizer_se,
-		sizer_s     = sizer_s,
-		sizer_e     = sizer_e,
-		content     = content,
-		frame       = frame,
-		type        = Type
+ localstatus = {},
+ titletext = titletext,
+ statustext = statustext,
+ titlebg = titlebg,
+ sizer_se = sizer_se,
+ sizer_s = sizer_s,
+ sizer_e = sizer_e,
+ content = content,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 	closebutton.obj, statusbg.obj = widget, widget
 

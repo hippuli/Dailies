@@ -32,63 +32,63 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:SetHeight(110)
-		self:SetWidth(110)
-		self:SetLabel()
-		self:SetImage(nil)
-		self:SetImageSize(64, 64)
-		self:SetDisabled(false)
+ self:SetHeight(110)
+ self:SetWidth(110)
+ self:SetLabel()
+ self:SetImage(nil)
+ self:SetImageSize(64, 64)
+ self:SetDisabled(false)
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetLabel"] = function(self, text)
-		if text and text ~= "" then
-			self.label:Show()
-			self.label:SetText(text)
-			self:SetHeight(self.image:GetHeight() + 25)
-		else
-			self.label:Hide()
-			self:SetHeight(self.image:GetHeight() + 10)
-		end
+ if text and text ~= "" then
+ self.label:Show()
+ self.label:SetText(text)
+ self:SetHeight(self.image:GetHeight() + 25)
+ else
+ self.label:Hide()
+ self:SetHeight(self.image:GetHeight() + 10)
+ end
 	end,
 
 	["SetImage"] = function(self, path, ...)
-		local image = self.image
-		image:SetTexture(path)
+ local image = self.image
+ image:SetTexture(path)
 
-		if image:GetTexture() then
-			local n = select("#", ...)
-			if n == 4 or n == 8 then
-				image:SetTexCoord(...)
-			else
-				image:SetTexCoord(0, 1, 0, 1)
-			end
-		end
+ if image:GetTexture() then
+ local n = select("#", ...)
+ if n == 4 or n == 8 then
+ image:SetTexCoord(...)
+ else
+ image:SetTexCoord(0, 1, 0, 1)
+ end
+ end
 	end,
 
 	["SetImageSize"] = function(self, width, height)
-		self.image:SetWidth(width)
-		self.image:SetHeight(height)
-		--self.frame:SetWidth(width + 30)
-		if self.label:IsShown() then
-			self:SetHeight(height + 25)
-		else
-			self:SetHeight(height + 10)
-		end
+ self.image:SetWidth(width)
+ self.image:SetHeight(height)
+ --self.frame:SetWidth(width + 30)
+ if self.label:IsShown() then
+ self:SetHeight(height + 25)
+ else
+ self:SetHeight(height + 10)
+ end
 	end,
 
 	["SetDisabled"] = function(self, disabled)
-		self.disabled = disabled
-		if disabled then
-			self.frame:Disable()
-			self.label:SetTextColor(0.5, 0.5, 0.5)
-			self.image:SetVertexColor(0.5, 0.5, 0.5, 0.5)
-		else
-			self.frame:Enable()
-			self.label:SetTextColor(1, 1, 1)
-			self.image:SetVertexColor(1, 1, 1, 1)
-		end
+ self.disabled = disabled
+ if disabled then
+ self.frame:Disable()
+ self.label:SetTextColor(0.5, 0.5, 0.5)
+ self.image:SetVertexColor(0.5, 0.5, 0.5, 0.5)
+ else
+ self.frame:Enable()
+ self.label:SetTextColor(1, 1, 1)
+ self.image:SetVertexColor(1, 1, 1, 1)
+ end
 	end
 }
 
@@ -123,13 +123,13 @@ local function Constructor()
 	highlight:SetBlendMode("ADD")
 
 	local widget = {
-		label = label,
-		image = image,
-		frame = frame,
-		type  = Type
+ label = label,
+ image = image,
+ frame = frame,
+ type = Type
 	}
 	for method, func in pairs(methods) do
-		widget[method] = func
+ widget[method] = func
 	end
 
 	widget.SetText = function(self, ...) print("AceGUI-3.0-Icon: SetText is deprecated! Use SetLabel instead!"); self:SetLabel(...) end

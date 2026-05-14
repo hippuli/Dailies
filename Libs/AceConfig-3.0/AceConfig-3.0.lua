@@ -37,7 +37,7 @@ local pcall, error, type, pairs = pcall, error, type, pairs
 -- You can supply a slash command (or a table of slash commands) to register with AceConfigCmd directly.
 -- @paramsig appName, options [, slashcmd]
 -- @param appName The application name for the config table.
--- @param options The option table (or a function to generate one on demand).  http://www.wowace.com/addons/ace3/pages/ace-config-3-0-options-tables/
+-- @param options The option table (or a function to generate one on demand). http://www.wowace.com/addons/ace3/pages/ace-config-3-0-options-tables/
 -- @param slashcmd A slash command to register for the option table, or a table of slash commands.
 -- @usage
 -- local AceConfig = LibStub("AceConfig-3.0")
@@ -47,12 +47,12 @@ function AceConfig:RegisterOptionsTable(appName, options, slashcmd)
 	if not ok then error(msg, 2) end
 
 	if slashcmd then
-		if type(slashcmd) == "table" then
-			for _,cmd in pairs(slashcmd) do
-				cfgcmd:CreateChatCommand(cmd, appName)
-			end
-		else
-			cfgcmd:CreateChatCommand(slashcmd, appName)
-		end
+ if type(slashcmd) == "table" then
+ for _,cmd in pairs(slashcmd) do
+ cfgcmd:CreateChatCommand(cmd, appName)
+ end
+ else
+ cfgcmd:CreateChatCommand(slashcmd, appName)
+ end
 	end
 end

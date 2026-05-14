@@ -29,36 +29,36 @@ Methods
 -------------------------------------------------------------------------------]]
 local methods = {
 	["OnAcquire"] = function(self)
-		self:LabelOnAcquire()
-		self:SetHighlight()
-		self:SetHighlightTexCoord()
-		self:SetDisabled(false)
+ self:LabelOnAcquire()
+ self:SetHighlight()
+ self:SetHighlightTexCoord()
+ self:SetDisabled(false)
 	end,
 
 	-- ["OnRelease"] = nil,
 
 	["SetHighlight"] = function(self, ...)
-		self.highlight:SetTexture(...)
+ self.highlight:SetTexture(...)
 	end,
 
 	["SetHighlightTexCoord"] = function(self, ...)
-		local c = select("#", ...)
-		if c == 4 or c == 8 then
-			self.highlight:SetTexCoord(...)
-		else
-			self.highlight:SetTexCoord(0, 1, 0, 1)
-		end
+ local c = select("#", ...)
+ if c == 4 or c == 8 then
+ self.highlight:SetTexCoord(...)
+ else
+ self.highlight:SetTexCoord(0, 1, 0, 1)
+ end
 	end,
 
 	["SetDisabled"] = function(self,disabled)
-		self.disabled = disabled
-		if disabled then
-			self.frame:EnableMouse(false)
-			self.label:SetTextColor(0.5, 0.5, 0.5)
-		else
-			self.frame:EnableMouse(true)
-			self.label:SetTextColor(1, 1, 1)
-		end
+ self.disabled = disabled
+ if disabled then
+ self.frame:EnableMouse(false)
+ self.label:SetTextColor(0.5, 0.5, 0.5)
+ else
+ self.frame:EnableMouse(true)
+ self.label:SetTextColor(1, 1, 1)
+ end
 	end
 }
 
@@ -84,7 +84,7 @@ local function Constructor()
 	label.type = Type
 	label.LabelOnAcquire = label.OnAcquire
 	for method, func in pairs(methods) do
-		label[method] = func
+ label[method] = func
 	end
 
 	return label

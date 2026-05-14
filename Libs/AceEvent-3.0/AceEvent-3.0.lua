@@ -26,7 +26,7 @@ AceEvent.embeds = AceEvent.embeds or {} -- what objects embed this lib
 -- APIs and registry for blizzard events, using CallbackHandler lib
 if not AceEvent.events then
 	AceEvent.events = CallbackHandler:New(AceEvent,
-		"RegisterEvent", "UnregisterEvent", "UnregisterAllEvents")
+ "RegisterEvent", "UnregisterEvent", "UnregisterAllEvents")
 end
 
 function AceEvent.events:OnUsed(target, eventname)
@@ -41,7 +41,7 @@ end
 -- APIs and registry for IPC messages, using CallbackHandler lib
 if not AceEvent.messages then
 	AceEvent.messages = CallbackHandler:New(AceEvent,
-		"RegisterMessage", "UnregisterMessage", "UnregisterAllMessages"
+ "RegisterMessage", "UnregisterMessage", "UnregisterAllMessages"
 	)
 	AceEvent.SendMessage = AceEvent.messages.Fire
 end
@@ -98,7 +98,7 @@ local mixins = {
 -- @param target target object to embed AceEvent in
 function AceEvent:Embed(target)
 	for k, v in pairs(mixins) do
-		target[v] = self[v]
+ target[v] = self[v]
 	end
 	self.embeds[target] = true
 	return target
